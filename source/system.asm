@@ -6,6 +6,7 @@ SYS_EXIT	equ	1
 SYS_READ	equ	3
 SYS_WRITE	equ	4
 SYS_OPEN	equ	5
+SYS_CLOSE	equ	6
 
 ; Status codes
 EXIT_SUCCESS	equ	0
@@ -67,6 +68,20 @@ sysOpen:
 	mov		ebx, [ebp + 8]	; file name
 	mov		ecx, [ebp + 12]	; flags
 	mov		edx, [ebp + 16]	; mode
+	int		0x80
+
+	pop		ebx
+
+	leave
+	ret
+
+sysClose:
+	enter	0, 0
+
+	push	ebx
+
+	mov		eax, SYS_CLOSE
+	mov		ebx, [ebp + 8]	; file descriptor
 	int		0x80
 
 	pop		ebx
