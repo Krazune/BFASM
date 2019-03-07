@@ -7,6 +7,7 @@ SYS_READ	equ	3
 SYS_WRITE	equ	4
 SYS_OPEN	equ	5
 SYS_CLOSE	equ	6
+SYS_LSEEK	equ	19
 
 ; Status codes
 EXIT_SUCCESS	equ	0
@@ -21,6 +22,11 @@ STDERR	equ	2
 RDONLY	equ	0
 WRONLY	equ	1
 RDWR	equ	2
+
+; File origin
+SEEK_SET	equ	0
+SEEK_CUR	equ	1
+SEEK_END	equ	2
 
 sysExit:
 	mov	eax, SYS_EXIT
@@ -82,6 +88,22 @@ sysClose:
 
 	mov		eax, SYS_CLOSE
 	mov		ebx, [ebp + 8]	; file descriptor
+	int		0x80
+
+	pop		ebx
+
+	leave
+	ret
+
+sysLSeek:
+	enter	0, 0
+
+	push	ebx
+
+	mov		eax, SYS_LSEEK
+	mov		ebx, [ebp + 8]	; file descriptor
+	mov		ecx, [ebp + 12]	; offset
+	mov		edx, [ebp + 16]	; origin
 	int		0x80
 
 	pop		ebx
