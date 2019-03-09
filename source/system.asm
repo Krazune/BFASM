@@ -29,9 +29,14 @@ SEEK_CUR	equ	1
 SEEK_END	equ	2
 
 sysExit:
+	enter	0, 0
+
 	mov	eax, SYS_EXIT
-	pop	ebx				; status code
+	mov	ebx, [ebp + 8]	; status code
 	int	0x80
+
+	leave				; unreachable code
+	ret					; unreachable code
 
 sysRead:
 	enter	0, 0
