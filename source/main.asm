@@ -11,7 +11,10 @@ _start:
 	cmp		dword [esp], 1			; Check if argument count is 1
 	je		_start.singleArgument	; Print program information
 
-	call	successExit
+	cmp		dword [esp], 2			; Check if argument count is 2
+	je		_start.doubleArguments	; Call interpreter
+
+	call	failureExit
 
 .singleArgument:
 	push	helpMessageLength
@@ -19,6 +22,11 @@ _start:
 	push	STDOUT
 	call	sysWrite
 	add		esp, 12
+
+	call	successExit
+
+.doubleArguments:
+	; Call interpreter
 
 	call	successExit
 
