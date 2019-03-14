@@ -37,7 +37,7 @@ interprete:
 	mov		ebp, esp
 	sub		esp, 4
 
-	push	0777
+	push	0
 	push	RDONLY
 	push	dword [ebp + 8]	; Input file path
 	call	sysOpen			; Open file
