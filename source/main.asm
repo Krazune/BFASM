@@ -1,7 +1,11 @@
 %include "system.asm"
 %include "interpreter.asm"
 
+
+
 global _start
+
+
 
 segment .data
 	helpMessage			db	'BFASM: Brainfuck interpreter for the IA-32 architecture.', 0xA, 'Usage: bfasm <path>', 0xA, 'Version: 2019.03.0', 0xA, 0
@@ -9,6 +13,8 @@ segment .data
 
 	invalidArgumentCountMessage			db	'Invalid argument count.', 0xA, 'Usage: bfasm <path>', 0xA, 0
 	invalidArgumentCountMessageLength	equ	$ - invalidArgumentCountMessage
+
+
 
 segment .text
 _start:
@@ -42,9 +48,13 @@ _start:
 	push	eax				; Use interpreter's return code as program exit status
 	call	sysExit
 
+
+
 successExit:
 	push	EXIT_SUCCESS
 	call	sysExit
+
+
 
 failureExit:
 	push	EXIT_FAILURE

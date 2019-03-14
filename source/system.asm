@@ -1,6 +1,8 @@
 %ifndef SYSTEM_ASM
 %define SYSTEM_ASM
 
+
+
 ; System calls
 SYS_EXIT	equ	1
 SYS_READ	equ	3
@@ -28,6 +30,8 @@ SEEK_SET	equ	0
 SEEK_CUR	equ	1
 SEEK_END	equ	2
 
+
+
 sysExit:
 	push	ebp
 	mov		ebp, esp
@@ -39,6 +43,8 @@ sysExit:
 	mov		esp, ebp	; unreachable code
 	pop		ebp			; unreachable code
 	ret					; unreachable code
+
+
 
 sysRead:
 	push	ebp
@@ -58,6 +64,8 @@ sysRead:
 	pop		ebp
 	ret
 
+
+
 sysWrite:
 	push	ebp
 	mov		ebp, esp
@@ -75,6 +83,8 @@ sysWrite:
 	mov		esp, ebp
 	pop		ebp
 	ret
+
+
 
 sysOpen:
 	push	ebp
@@ -94,6 +104,8 @@ sysOpen:
 	pop		ebp
 	ret
 
+
+
 sysClose:
 	push	ebp
 	mov		ebp, esp
@@ -109,6 +121,8 @@ sysClose:
 	mov		esp, ebp
 	pop		ebp
 	ret
+
+
 
 sysLSeek:
 	push	ebp
@@ -127,5 +141,7 @@ sysLSeek:
 	mov		esp, ebp
 	pop		ebp
 	ret
+
+
 
 %endif

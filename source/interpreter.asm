@@ -1,12 +1,18 @@
 %ifndef INTERPRETER_ASM
 %define INTERPRETER_ASM
 
+
+
 %include "system.asm"
+
+
 
 NO_ERROR		equ	0
 GENERAL_ERROR	equ	1
 
 TAPE_SIZE		equ	30000
+
+
 
 segment .data
 	leftBracketError		db	'No matching right bracket.', 0xA, 0
@@ -18,8 +24,12 @@ segment .data
 	tape			times TAPE_SIZE db	0
 	cellIndex		dd	0
 
+
+
 segment .bss
 	inputFileDescriptor	resd	1
+
+
 
 segment .text
 interprete:
@@ -135,6 +145,8 @@ interprete:
 	pop		ebp
 	ret
 
+
+
 incrementCellIndex:
 	push	ebp
 	mov		ebp, esp
@@ -150,6 +162,8 @@ incrementCellIndex:
 	mov		esp, ebp
 	pop		ebp
 	ret
+
+
 
 decrementCellIndex:
 	push	ebp
@@ -167,6 +181,8 @@ decrementCellIndex:
 	pop		ebp
 	ret
 
+
+
 incrementCellValue:
 	push	ebp
 	mov		ebp, esp
@@ -178,6 +194,8 @@ incrementCellValue:
 	pop		ebp
 	ret
 
+
+
 decrementCellValue:
 	push	ebp
 	mov		ebp, esp
@@ -188,6 +206,8 @@ decrementCellValue:
 	mov		esp, ebp
 	pop		ebp
 	ret
+
+
 
 printValue:
 	push	ebp
@@ -206,6 +226,8 @@ printValue:
 	pop		ebp
 	ret
 
+
+
 getValue:
 	push	ebp
 	mov		ebp, esp
@@ -222,6 +244,8 @@ getValue:
 	mov		esp, ebp
 	pop		ebp
 	ret
+
+
 
 jumpForwards:
 	push	ebp
@@ -281,6 +305,8 @@ jumpForwards:
 	mov		esp, ebp
 	pop		ebp
 	ret
+
+
 
 jumpBackwards:
 	push	ebp
@@ -344,6 +370,8 @@ jumpBackwards:
 	pop		ebp
 	ret
 
+
+
 printLeftBracketError:
 	push	ebp
 	mov		ebp, esp
@@ -358,6 +386,8 @@ printLeftBracketError:
 	pop		ebp
 	ret
 
+
+
 printRightBracketError:
 	push	ebp
 	mov		ebp, esp
@@ -371,5 +401,7 @@ printRightBracketError:
 	mov		esp, ebp
 	pop		ebp
 	ret
+
+
 
 %endif
