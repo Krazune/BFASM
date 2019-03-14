@@ -33,114 +33,114 @@ SEEK_END	equ	2
 
 
 sysExit:
-	push	ebp
-	mov		ebp, esp
+	push	ebp			; Store base pointer
+	mov		ebp, esp	; Set base pointer to stack pointer
 
-	mov	eax, SYS_EXIT
-	mov	ebx, [ebp + 8]	; status code
-	int	0x80
+	mov	eax, SYS_EXIT	; Set sys_exit system call number
+	mov	ebx, [ebp + 8]	; Use parameter as exit status
+	int	0x80			; Kernel interrupt
 
-	mov		esp, ebp	; unreachable code
-	pop		ebp			; unreachable code
-	ret					; unreachable code
+	mov		esp, ebp	; Unreachable code
+	pop		ebp			; Unreachable code
+	ret					; Unreachable code
 
 
 
 sysRead:
-	push	ebp
-	mov		ebp, esp
+	push	ebp				; Store base pointer
+	mov		ebp, esp		; Set base pointer to stack pointer
 
-	push	ebx
+	push	ebx				; Store non-volatile register ebx
 
-	mov		eax, SYS_READ
-	mov		ebx, [ebp + 8]	; file descriptor
-	mov		ecx, [ebp + 12]	; destination buffer
-	mov		edx, [ebp + 16]	; count
-	int		0x80
+	mov		eax, SYS_READ	; Set sys_read system call number
+	mov		ebx, [ebp + 8]	; File descriptor to read from
+	mov		ecx, [ebp + 12]	; Destination buffer
+	mov		edx, [ebp + 16]	; Amount of bytes to be read
+	int		0x80			; Kernel interrupt
 
-	pop		ebx
+	pop		ebx				; Restore non-volatile register ebx
 
-	mov		esp, ebp
-	pop		ebp
-	ret
+	mov		esp, ebp		; Clear stack
+	pop		ebp				; Restore base pointer
+	ret						; Return to caller
 
 
 
 sysWrite:
-	push	ebp
-	mov		ebp, esp
+	push	ebp				; Store base pointer
+	mov		ebp, esp		; Set base pointer to stack pointer
 
-	push	ebx
+	push	ebx				; Store non-volatile register ebx
 
-	mov		eax, SYS_WRITE
-	mov		ebx, [ebp + 8]	; file descriptor
-	mov		ecx, [ebp + 12]	; source buffer
-	mov		edx, [ebp + 16]	; count
-	int		0x80
+	mov		eax, SYS_WRITE	; Set sys_write system call number
+	mov		ebx, [ebp + 8]	; File descriptor to write to
+	mov		ecx, [ebp + 12]	; Source buffer
+	mov		edx, [ebp + 16]	; Amount of bytes to be written
+	int		0x80			; Kernel interrupt
 
-	pop		ebx
+	pop		ebx				; Restore non-volatile register ebx
 
-	mov		esp, ebp
-	pop		ebp
-	ret
+	mov		esp, ebp		; Clear stack
+	pop		ebp				; Restore base pointer
+	ret						; Return to caller
 
 
 
 sysOpen:
-	push	ebp
-	mov		ebp, esp
+	push	ebp				; Store base pointer
+	mov		ebp, esp		; Set base pointer to stack pointer
 
-	push	ebx
+	push	ebx				; Store non-volatile register ebx
 
-	mov		eax, SYS_OPEN
-	mov		ebx, [ebp + 8]	; file name
-	mov		ecx, [ebp + 12]	; flags
-	mov		edx, [ebp + 16]	; mode
-	int		0x80
+	mov		eax, SYS_OPEN	; Set sys_open system call number
+	mov		ebx, [ebp + 8]	; File name
+	mov		ecx, [ebp + 12]	; Flags
+	mov		edx, [ebp + 16]	; Mode
+	int		0x80			; Kernel interrupt
 
-	pop		ebx
+	pop		ebx				; Restore non-volatile register ebx
 
-	mov		esp, ebp
-	pop		ebp
-	ret
+	mov		esp, ebp		; Clear stack
+	pop		ebp				; Restore base pointer
+	ret						; Return to caller
 
 
 
 sysClose:
-	push	ebp
-	mov		ebp, esp
+	push	ebp				; Store base pointer
+	mov		ebp, esp		; Set base pointer to stack pointer
 
-	push	ebx
+	push	ebx				; Store non-volatile register ebx
 
-	mov		eax, SYS_CLOSE
-	mov		ebx, [ebp + 8]	; file descriptor
-	int		0x80
+	mov		eax, SYS_CLOSE	; Set sys_close system call number
+	mov		ebx, [ebp + 8]	; File descriptor to be closed
+	int		0x80			; Kernel interrupt
 
-	pop		ebx
+	pop		ebx				; Restore non-volatile register ebx
 
-	mov		esp, ebp
-	pop		ebp
-	ret
+	mov		esp, ebp		; Clear stack
+	pop		ebp				; Restore base pointer
+	ret						; Return to caller
 
 
 
 sysLSeek:
-	push	ebp
-	mov		ebp, esp
+	push	ebp				; Store base pointer
+	mov		ebp, esp		; Set base pointer to stack pointer
 
-	push	ebx
+	push	ebx				; Store non-volatile register ebx
 
-	mov		eax, SYS_LSEEK
-	mov		ebx, [ebp + 8]	; file descriptor
-	mov		ecx, [ebp + 12]	; offset
-	mov		edx, [ebp + 16]	; origin
-	int		0x80
+	mov		eax, SYS_LSEEK	; Set sys_lseek system call number
+	mov		ebx, [ebp + 8]	; File descriptor to seek
+	mov		ecx, [ebp + 12]	; Byte offset
+	mov		edx, [ebp + 16]	; Origin
+	int		0x80			; Kernel interrupt
 
-	pop		ebx
+	pop		ebx				; Restore non-volatile register ebx
 
-	mov		esp, ebp
-	pop		ebp
-	ret
+	mov		esp, ebp		; Clear stack
+	pop		ebp				; Restore base pointer
+	ret						; Return to caller
 
 
 
