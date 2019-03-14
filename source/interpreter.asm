@@ -85,7 +85,7 @@ interprete:
 	jmp		interprete.readingLoop
 
 .dot:
-	; interprete .
+	call	printValue
 	jmp		interprete.readingLoop
 
 .comma:
@@ -158,6 +158,21 @@ decrementCellValue:
 
 	mov		eax, dword [cellIndex]
 	dec		byte [eax + tape]
+
+	leave
+	ret
+
+printValue:
+	enter	0, 0
+
+	mov		eax, tape
+	add		eax, dword [cellIndex]
+
+	push	1
+	push	eax
+	push	STDOUT
+	call	sysWrite
+	add		esp, 12
 
 	leave
 	ret
