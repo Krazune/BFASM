@@ -6,6 +6,12 @@
 NO_ERROR		equ	0
 GENERAL_ERROR	equ	1
 
+TAPE_SIZE		equ	30000
+
+segment .data
+	tape			times TAPE_SIZE db	0
+	cellIndex		dd	0
+
 segment .bss
 	inputFileDescriptor	resd	1
 
@@ -63,7 +69,7 @@ interprete:
 	jmp interprete.readingLoop
 
 .greaterThan:
-	; interprete >
+	call	incrementCellIndex
 	jmp		interprete.readingLoop
 
 .lessThan:
@@ -105,6 +111,20 @@ interprete:
 
 	mov		eax, NO_ERROR
 	jmp		interprete.exit
+
+.exit:
+	leave
+	ret
+
+incrementCellIndex:
+	enter	0, 0
+
+	inc		dword [cellIndex]
+
+	cmp		dword [cellIndex], TAPE_SIZE	; Check for wraping
+	jl		incrementCellIndex.exit
+
+	mov		dword [cellIndex], 0			; Wrap around to 0
 
 .exit:
 	leave
