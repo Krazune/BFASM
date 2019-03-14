@@ -89,7 +89,7 @@ interprete:
 	jmp		interprete.readingLoop
 
 .comma:
-	; interprete ,
+	call	getValue
 	jmp		interprete.readingLoop
 
 .leftBracket:
@@ -172,6 +172,21 @@ printValue:
 	push	eax
 	push	STDOUT
 	call	sysWrite
+	add		esp, 12
+
+	leave
+	ret
+
+getValue:
+	enter	0, 0
+
+	mov		eax, tape
+	add		eax, dword [cellIndex]
+
+	push	1
+	push	eax
+	push	STDIN
+	call	sysRead
 	add		esp, 12
 
 	leave
