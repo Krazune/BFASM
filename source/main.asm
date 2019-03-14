@@ -26,7 +26,7 @@ _start:
 
 	push	invalidArgumentCountMessageLength
 	push	invalidArgumentCountMessage
-	push	STDOUT
+	push	STDERR
 	call	sysWrite							; Print invalid argument count error message
 	add		esp, 12
 
