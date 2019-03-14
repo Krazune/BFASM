@@ -1,4 +1,5 @@
 %include "system.asm"
+%include "interpreter.asm"
 
 global _start
 
@@ -35,9 +36,11 @@ _start:
 	call	successExit
 
 .doubleArguments:
-	; Call interpreter
+	push	dword [esp + 8]	; Push input file path (second program argument)
+	call	interprete		; interprete input file
 
-	call	successExit
+	push	eax				; Use interpreter's return code as program exit status
+	call	sysExit
 
 successExit:
 	push	EXIT_SUCCESS
