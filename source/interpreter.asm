@@ -50,8 +50,8 @@ interprete:
 
 	; Interprete file
 .readingLoop:
-	push	1
 	lea		eax, [ebp - 4]
+	push	1
 	push	eax
 	push	dword [inputFileDescriptor]
 	call	sysRead
@@ -263,8 +263,8 @@ jumpForwards:
 	mov		dword [ebp - 8], 1
 
 .readingLoop:
-	push	1
 	lea		eax, [ebp - 4]
+	push	1
 	push	eax
 	push	dword [inputFileDescriptor]
 	call	sysRead
@@ -330,8 +330,8 @@ jumpBackwards:
 	cmp		eax, 0
 	jl		jumpBackwards.error	; this does not check if there actualy is a matching [ (if the cell value is 0)
 
-	push	1
 	lea		eax, [ebp - 4]
+	push	1
 	push	eax
 	push	dword [inputFileDescriptor]
 	call	sysRead
