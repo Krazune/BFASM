@@ -81,7 +81,7 @@ interprete:
 	jmp		interprete.readingLoop
 
 .minus:
-	; interprete -
+	call	decrementCellValue
 	jmp		interprete.readingLoop
 
 .dot:
@@ -149,6 +149,15 @@ incrementCellValue:
 
 	mov		eax, dword [cellIndex]
 	inc		byte [eax + tape]
+
+	leave
+	ret
+
+decrementCellValue:
+	enter	0, 0
+
+	mov		eax, dword [cellIndex]
+	dec		byte [eax + tape]
 
 	leave
 	ret
