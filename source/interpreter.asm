@@ -9,6 +9,9 @@ GENERAL_ERROR	equ	1
 TAPE_SIZE		equ	30000
 
 segment .data
+	leftBracketError		db	'No matching right bracket.', 0xA, 0
+	leftBracketErrorLength	equ	$ - leftBracketError
+
 	tape			times TAPE_SIZE db	0
 	cellIndex		dd	0
 
@@ -93,8 +96,13 @@ interprete:
 	jmp		interprete.readingLoop
 
 .leftBracket:
-	; interprete [
-	jmp		interprete.readingLoop
+	call	jumpForwards
+
+	cmp		eax, 0
+	jne		interprete.readingLoop
+
+	call	printLeftBracketError
+	jmp		interprete.failure
 
 .rightBracket:
 	; interprete ]
@@ -187,6 +195,74 @@ getValue:
 	push	eax
 	push	STDIN
 	call	sysRead
+	add		esp, 12
+
+	leave
+	ret
+
+jumpForwards:
+	enter	8, 0
+
+;	mov		eax, tape
+;	add		eax, dword [cellIndex]
+
+	mov		eax, dword [cellIndex]
+
+	cmp		byte [eax + tape], 0
+	jne		jumpForwards.success
+
+	mov		dword [ebp - 8], 1
+
+.readingLoop:
+	push	1
+	lea		eax, [ebp - 4]
+	push	eax
+	push	dword [inputFileDescriptor]
+	call	sysRead
+	add		esp, 12
+
+	cmp		eax, 0 ; not working properly
+	je		jumpForwards.error
+
+	cmp		byte [ebp - 4], '['
+	je		jumpForwards.leftBracket
+
+	cmp		byte [ebp - 4], ']'
+	je		jumpForwards.rightBracket
+
+	jmp		jumpForwards.readingLoop
+
+.leftBracket:
+	inc		dword [ebp - 8]
+	jmp		jumpForwards.readingLoop
+
+.rightBracket:
+	dec		dword [ebp - 8]
+
+	cmp		dword [ebp - 8], 0
+	jne		jumpForwards.readingLoop
+
+	jmp		jumpForwards.success
+
+.error:
+	mov		eax, 0
+	jmp		jumpForwards.exit
+
+.success:
+	mov		eax, 1 ;
+	jmp		jumpForwards.exit
+
+.exit:
+	leave
+	ret
+
+printLeftBracketError:
+	enter	0, 0
+
+	push	leftBracketErrorLength
+	push	leftBracketError
+	push	STDERR
+	call	sysWrite
 	add		esp, 12
 
 	leave
