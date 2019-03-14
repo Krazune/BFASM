@@ -29,17 +29,20 @@ SEEK_CUR	equ	1
 SEEK_END	equ	2
 
 sysExit:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	mov	eax, SYS_EXIT
 	mov	ebx, [ebp + 8]	; status code
 	int	0x80
 
-	leave				; unreachable code
+	mov		esp, ebp	; unreachable code
+	pop		ebp			; unreachable code
 	ret					; unreachable code
 
 sysRead:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	push	ebx
 
@@ -51,11 +54,13 @@ sysRead:
 
 	pop		ebx
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 sysWrite:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	push	ebx
 
@@ -67,11 +72,13 @@ sysWrite:
 
 	pop		ebx
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 sysOpen:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	push	ebx
 
@@ -83,11 +90,13 @@ sysOpen:
 
 	pop		ebx
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 sysClose:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	push	ebx
 
@@ -97,11 +106,13 @@ sysClose:
 
 	pop		ebx
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 sysLSeek:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	push	ebx
 
@@ -113,7 +124,8 @@ sysLSeek:
 
 	pop		ebx
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 %endif

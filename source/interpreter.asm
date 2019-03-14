@@ -23,7 +23,9 @@ segment .bss
 
 segment .text
 interprete:
-	enter	4, 0
+	push	ebp
+	mov		ebp, esp
+	sub		esp, 4
 
 	push	0777
 	push	RDONLY
@@ -129,11 +131,13 @@ interprete:
 	jmp		interprete.exit
 
 .exit:
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 incrementCellIndex:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	inc		dword [cellIndex]
 
@@ -143,11 +147,13 @@ incrementCellIndex:
 	mov		dword [cellIndex], 0			; Wrap around to 0
 
 .exit:
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 decrementCellIndex:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	dec		dword [cellIndex]
 
@@ -157,29 +163,35 @@ decrementCellIndex:
 	mov		dword [cellIndex], TAPE_SIZE - 1	; Wrap around to last cell
 
 .exit:
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 incrementCellValue:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	mov		eax, dword [cellIndex]
 	inc		byte [eax + tape]
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 decrementCellValue:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	mov		eax, dword [cellIndex]
 	dec		byte [eax + tape]
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 printValue:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	mov		eax, tape
 	add		eax, dword [cellIndex]
@@ -190,11 +202,13 @@ printValue:
 	call	sysWrite
 	add		esp, 12
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 getValue:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	mov		eax, tape
 	add		eax, dword [cellIndex]
@@ -205,11 +219,14 @@ getValue:
 	call	sysRead
 	add		esp, 12
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 jumpForwards:
-	enter	8, 0
+	push	ebp
+	mov		ebp, esp
+	sub		esp, 8
 
 ;	mov		eax, tape
 ;	add		eax, dword [cellIndex]
@@ -261,11 +278,14 @@ jumpForwards:
 	jmp		jumpForwards.exit
 
 .exit:
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 jumpBackwards:
-	enter	8, 0
+	push	ebp
+	mov		ebp, esp
+	sub		esp, 8
 
 	mov		eax, dword [cellIndex]
 
@@ -320,11 +340,13 @@ jumpBackwards:
 	jmp		jumpBackwards.exit
 
 .exit:
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 printLeftBracketError:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	push	leftBracketErrorLength
 	push	leftBracketError
@@ -332,11 +354,13 @@ printLeftBracketError:
 	call	sysWrite
 	add		esp, 12
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 printRightBracketError:
-	enter	0, 0
+	push	ebp
+	mov		ebp, esp
 
 	push	rightBracketErrorLength
 	push	rightBracketError
@@ -344,7 +368,8 @@ printRightBracketError:
 	call	sysWrite
 	add		esp, 12
 
-	leave
+	mov		esp, ebp
+	pop		ebp
 	ret
 
 %endif
