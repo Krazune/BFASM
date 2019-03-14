@@ -73,7 +73,7 @@ interprete:
 	jmp		interprete.readingLoop
 
 .lessThan:
-	; interprete <
+	call	decrementCellIndex
 	jmp		interprete.readingLoop
 
 .plus:
@@ -125,6 +125,20 @@ incrementCellIndex:
 	jl		incrementCellIndex.exit
 
 	mov		dword [cellIndex], 0			; Wrap around to 0
+
+.exit:
+	leave
+	ret
+
+decrementCellIndex:
+	enter	0, 0
+
+	dec		dword [cellIndex]
+
+	cmp		dword [cellIndex], 0				; Check for wraping
+	jge		incrementCellIndex.exit
+
+	mov		dword [cellIndex], TAPE_SIZE - 1	; Wrap around to last cell
 
 .exit:
 	leave
