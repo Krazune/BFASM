@@ -12,6 +12,9 @@ segment .data
 	leftBracketError		db	'No matching right bracket.', 0xA, 0
 	leftBracketErrorLength	equ	$ - leftBracketError
 
+	rightBracketError		db	'No matching left bracket.', 0xA, 0
+	rightBracketErrorLength	equ	$ - rightBracketError
+
 	tape			times TAPE_SIZE db	0
 	cellIndex		dd	0
 
@@ -105,8 +108,13 @@ interprete:
 	jmp		interprete.failure
 
 .rightBracket:
-	; interprete ]
-	jmp		interprete.readingLoop
+	call	jumpBackwards
+
+	cmp		eax, 0
+	jne		interprete.readingLoop
+
+	call	printRightBracketError
+	jmp		interprete.failure
 
 .failure:
 	mov		eax, GENERAL_ERROR
@@ -256,11 +264,82 @@ jumpForwards:
 	leave
 	ret
 
+jumpBackwards:
+	enter	8, 0
+
+	mov		eax, dword [cellIndex]
+
+	cmp		byte [eax + tape], 0
+	je		jumpBackwards.success
+
+	mov		dword [ebp - 8], 1
+
+.readingLoop:
+	push	SEEK_CUR
+	push	-2
+	push	dword [inputFileDescriptor]
+	call	sysLSeek
+	add		esp, 12
+
+	cmp		eax, 0
+	jl		jumpBackwards.error	; this does not check if there actualy is a matching [ (if the cell value is 0)
+
+	push	1
+	lea		eax, [ebp - 4]
+	push	eax
+	push	dword [inputFileDescriptor]
+	call	sysRead
+	add		esp, 12
+
+	cmp		byte [ebp - 4], '['
+	je		jumpBackwards.leftBracket
+
+	cmp		byte [ebp - 4], ']'
+	je		jumpBackwards.rightBracket
+
+	jmp		jumpBackwards.readingLoop
+
+.leftBracket:
+	dec		dword [ebp - 8]
+
+	cmp		dword [ebp - 8], 0
+	jne		jumpBackwards.readingLoop
+
+	jmp		jumpBackwards.success
+
+.rightBracket:
+	inc		dword [ebp - 8]
+	jmp		jumpBackwards.readingLoop
+
+.error:
+	mov		eax, 0
+	jmp		jumpBackwards.exit
+
+.success:
+	mov		eax, 1 ; 1 = success
+	jmp		jumpBackwards.exit
+
+.exit:
+	leave
+	ret
+
 printLeftBracketError:
 	enter	0, 0
 
 	push	leftBracketErrorLength
 	push	leftBracketError
+	push	STDERR
+	call	sysWrite
+	add		esp, 12
+
+	leave
+	ret
+
+printRightBracketError:
+	enter	0, 0
+
+	push	rightBracketErrorLength
+	push	rightBracketError
 	push	STDERR
 	call	sysWrite
 	add		esp, 12
