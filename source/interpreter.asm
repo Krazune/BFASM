@@ -8,7 +8,7 @@
 
 
 NO_ERROR				equ	0
-GENERAL_ERROR			equ	-1
+INVALID_PATH			equ	-1
 MISSING_LEFT_BRACKET	equ	-2
 MISSING_RIGHT_BRACKET	equ	-3
 
@@ -40,7 +40,7 @@ interprete:
 	add		esp, 12						; Clear stack arguments
 
 	cmp		eax, 0						; Check if the file was open successfully
-	jl		interprete.failure			; Exit the procedure if the file was not open successfully
+	jl		interprete.invalidPath		; Exit the procedure if the file was not open successfully
 
 	mov		[inputFileDescriptor], eax	; Store file descriptor
 
@@ -121,8 +121,8 @@ interprete:
 
 	jmp		interprete.exit				; Exit the procedure with a failure return value
 
-.failure:
-	mov		eax, GENERAL_ERROR			; Set the failure return value
+.invalidPath:
+	mov		eax, INVALID_PATH			; Set the failure return value
 	jmp		interprete.exit				; Exit the procedure
 
 .success:

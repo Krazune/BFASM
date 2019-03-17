@@ -14,6 +14,9 @@ segment .data
 	invalidArgumentCountMessage			db	'Invalid argument count.', 0xA, 'Usage: bfasm <path>', 0xA, 0
 	invalidArgumentCountMessageLength	equ	$ - invalidArgumentCountMessage
 
+	invalidPathError		db	'Invalid path.', 0xA, 0
+	invalidPathErrorLength	equ	$ - invalidPathError
+
 	leftBracketError		db	'No matching left bracket.', 0xA, 0
 	leftBracketErrorLength	equ	$ - leftBracketError
 
@@ -46,11 +49,19 @@ _start:
 	cmp		eax, NO_ERROR				; Check for no error return code
 	je		_start.successExit			; Exit program with success exit status
 
+	cmp		eax, INVALID_PATH			; Check for invalid path return code
+	je		_start.invalidPath			; Print invalid path error and exit program
+
 	cmp		eax, MISSING_LEFT_BRACKET	; Check for missing left bracket return code
 	je		_start.missingLeftBracket	; Print missing bracket error and exit program
 
 	cmp		eax, MISSING_RIGHT_BRACKET	; Check for missing right bracket return code
 	je		_start.missingRightBracket	; Print missing bracket error and exit program
+
+.invalidPath:
+	call	printInvalidPathError		; Print missing bracket error
+
+	jmp		_start.failureExit			; Exit program with failure exit status
 
 .missingLeftBracket:
 	call	printLeftBracketError		; Print missing bracket error
@@ -101,6 +112,22 @@ printArgumentCountError:
 	mov		esp, ebp							; Clear stack
 	pop		ebp									; Restore base pointer
 	ret											; Return to caller
+
+
+
+printInvalidPathError:
+	push	ebp						; Store base pointer
+	mov		ebp, esp				; Set base pointer to stack pointer
+
+	push	invalidPathErrorLength
+	push	invalidPathError
+	push	STDERR
+	call	sysWrite				; Print invalid path error
+	add		esp, 12					; Clear stack arguments
+
+	mov		esp, ebp				; Clear stack
+	pop		ebp						; Restore base pointer
+	ret								; Return to caller
 
 
 
