@@ -26,12 +26,12 @@ _start:
 
 	call	printArgumentCountError	; Print error if the argument count is greater than 2
 
-	call	failureExit				; Exit program with failure exit status on invalid argument count
+	jmp		_start.failureExit		; Exit program with failure exit status on invalid argument count
 
 .singleArgument:
 	call	printInformation		; Print program information
 
-	call	successExit				; Exit program with success exit status
+	jmp		_start.successExit		; Exit program with success exit status
 
 .doubleArguments:
 	push	dword [esp + 8]			; Push second argument to be used as parameter to the interpreter
@@ -40,17 +40,13 @@ _start:
 	push	eax						; Push interpreter's return value to be used as the program exit status
 	call	sysExit					; Exit program
 
+.successExit:
+	push	EXIT_SUCCESS			; Set success exit status
+	call	sysExit					; Exit program
 
-
-successExit:
-	push	EXIT_SUCCESS	; Set success exit status
-	call	sysExit			; Exit program
-
-
-
-failureExit:
-	push	EXIT_FAILURE	; Set failure exit status
-	call	sysExit			; Exit program
+.failureExit:
+	push	EXIT_FAILURE			; Set failure exit status
+	call	sysExit					; Exit program
 
 
 
