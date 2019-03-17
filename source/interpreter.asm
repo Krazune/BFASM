@@ -7,20 +7,16 @@
 
 
 
-NO_ERROR		equ	0
-GENERAL_ERROR	equ	1
+NO_ERROR				equ	0
+GENERAL_ERROR			equ	-1
+MISSING_LEFT_BRACKET	equ	-2
+MISSING_RIGHT_BRACKET	equ	-3
 
 TAPE_SIZE		equ	30000
 
 
 
 segment .data
-	leftBracketError		db	'No matching left bracket.', 0xA, 0
-	leftBracketErrorLength	equ	$ - leftBracketError
-
-	rightBracketError		db	'No matching right bracket.', 0xA, 0
-	rightBracketErrorLength	equ	$ - rightBracketError
-
 	tape			times TAPE_SIZE db	0
 	cellIndex		dd	0
 
@@ -112,20 +108,18 @@ interprete:
 .leftBracket:
 	call	jumpForwards				; Jump forward to the instruction after the matching ']' symbol if the current cell value is 0
 
-	cmp		eax, 0						; Check if any error occurred when jumping forward (missing matching bracket)
-	jne		interprete.readingLoop		; Keep reading the file if no error was found
+	cmp		eax, NO_ERROR				; Check if any error occurred when jumping forward (missing matching bracket)
+	je		interprete.readingLoop		; Keep reading the file if no error was found
 
-	call	printRightBracketError		; Print the missing bracket error
-	jmp		interprete.failure			; Exit the procedure with a failure return value
+	jmp		interprete.exit				; Exit the procedure with a failure return value
 
 .rightBracket:
 	call	jumpBackwards				; Jump backwards to the instruction after the matching '[' symbol if the current cell value is not 0
 
-	cmp		eax, 0						; Check if any error occurred when jumping backwards (missing matching bracket)
-	jne		interprete.readingLoop		; Keep reading the file if no error was found
+	cmp		eax, NO_ERROR				; Check if any error occurred when jumping backwards (missing matching bracket)
+	je		interprete.readingLoop		; Keep reading the file if no error was found
 
-	call	printLeftBracketError		; Print the missing bracket error
-	jmp		interprete.failure			; Exit the procedure with a failure return value
+	jmp		interprete.exit				; Exit the procedure with a failure return value
 
 .failure:
 	mov		eax, GENERAL_ERROR			; Set the failure return value
@@ -290,11 +284,11 @@ jumpForwards:
 	jmp		jumpForwards.success		; If the nesting level is 0 exit the procedure successfully
 
 .error:
-	mov		eax, 0						; Set the failure return value
+	mov		eax, MISSING_RIGHT_BRACKET	; Set the missing bracket error return value
 	jmp		jumpForwards.exit			; Exit the procedure
 
 .success:
-	mov		eax, 1						; Set the successfully return value
+	mov		eax, NO_ERROR				; Set the successfully return value
 	jmp		jumpForwards.exit			; Exit the procedure
 
 .exit:
@@ -354,49 +348,17 @@ jumpBackwards:
 	jmp		jumpBackwards.readingLoop	; Keep reading the file
 
 .error:
-	mov		eax, 0						; Set the failure return value
+	mov		eax, MISSING_LEFT_BRACKET	; Set the missing bracket error return value
 	jmp		jumpBackwards.exit			; Exit the procedure
 
 .success:
-	mov		eax, 1						; Set the successfully return value
+	mov		eax, NO_ERROR				; Set the successfully return value
 	jmp		jumpBackwards.exit			; Exit the procedure
 
 .exit:
 	mov		esp, ebp					; Clear stack
 	pop		ebp							; Restore base pointer
 	ret									; Return to caller
-
-
-
-printLeftBracketError:
-	push	ebp						; Store base pointer
-	mov		ebp, esp				; Set base pointer to stack pointer
-
-	push	leftBracketErrorLength
-	push	leftBracketError
-	push	STDERR
-	call	sysWrite				; Print missing left bracket error
-	add		esp, 12					; Clear stack arguments
-
-	mov		esp, ebp				; Clear stack
-	pop		ebp						; Restore base pointer
-	ret								; Return to caller
-
-
-
-printRightBracketError:
-	push	ebp						; Store base pointer
-	mov		ebp, esp				; Set base pointer to stack pointer
-
-	push	rightBracketErrorLength
-	push	rightBracketError
-	push	STDERR
-	call	sysWrite				; Print missing left bracket error
-	add		esp, 12					; Clear stack arguments
-
-	mov		esp, ebp				; Clear stack
-	pop		ebp						; Restore base pointer
-	ret								; Return to caller
 
 
 
