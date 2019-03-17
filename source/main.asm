@@ -18,35 +18,27 @@ segment .data
 
 segment .text
 _start:
-	cmp		dword [esp], 1						; Check for single command line argument
-	je		_start.singleArgument				; Print program information if single argument
+	cmp		dword [esp], 1			; Check for single command line argument
+	je		_start.singleArgument	; Print program information if single argument
 
-	cmp		dword [esp], 2						; Check for double command line arguments
-	je		_start.doubleArguments				; Call interpreter if double arguments
+	cmp		dword [esp], 2			; Check for double command line arguments
+	je		_start.doubleArguments	; Call interpreter if double arguments
 
-	push	invalidArgumentCountMessageLength
-	push	invalidArgumentCountMessage
-	push	STDERR
-	call	sysWrite							; Print error if the argument count is greater than 2
-	add		esp, 12								; Clear stack arguments
+	call	printArgumentCountError	; Print error if the argument count is greater than 2
 
-	call	failureExit							; Exit program with failure exit status on invalid argument count
+	call	failureExit				; Exit program with failure exit status on invalid argument count
 
 .singleArgument:
-	push	helpMessageLength
-	push	helpMessage
-	push	STDOUT
-	call	sysWrite							; Print program information
-	add		esp, 12								; Clear stack arguments
+	call	printInformation		; Print program information
 
-	call	successExit							; Exit program with success exit status
+	call	successExit				; Exit program with success exit status
 
 .doubleArguments:
-	push	dword [esp + 8]						; Push second argument to be used as parameter to the interpreter
-	call	interprete							; Call interpreter
+	push	dword [esp + 8]			; Push second argument to be used as parameter to the interpreter
+	call	interprete				; Call interpreter
 
-	push	eax									; Push interpreter's return value to be used as the program exit status
-	call	sysExit								; Exit program
+	push	eax						; Push interpreter's return value to be used as the program exit status
+	call	sysExit					; Exit program
 
 
 
@@ -59,3 +51,35 @@ successExit:
 failureExit:
 	push	EXIT_FAILURE	; Set failure exit status
 	call	sysExit			; Exit program
+
+
+
+printInformation:
+	push	ebp					; Store base pointer
+	mov		ebp, esp			; Set base pointer to stack pointer
+
+	push	helpMessageLength
+	push	helpMessage
+	push	STDOUT
+	call	sysWrite			; Print program information
+	add		esp, 12				; Clear stack arguments
+
+	mov		esp, ebp			; Clear stack
+	pop		ebp					; Restore base pointer
+	ret							; Return to caller
+
+
+
+printArgumentCountError:
+	push	ebp									; Store base pointer
+	mov		ebp, esp							; Set base pointer to stack pointer
+
+	push	invalidArgumentCountMessageLength
+	push	invalidArgumentCountMessage
+	push	STDERR
+	call	sysWrite							; Print argument count error message
+	add		esp, 12								; Clear stack arguments
+
+	mov		esp, ebp							; Clear stack
+	pop		ebp									; Restore base pointer
+	ret											; Return to caller
