@@ -15,10 +15,10 @@ TAPE_SIZE		equ	30000
 
 
 segment .data
-	leftBracketError		db	'No matching right bracket.', 0xA, 0
+	leftBracketError		db	'No matching left bracket.', 0xA, 0
 	leftBracketErrorLength	equ	$ - leftBracketError
 
-	rightBracketError		db	'No matching left bracket.', 0xA, 0
+	rightBracketError		db	'No matching right bracket.', 0xA, 0
 	rightBracketErrorLength	equ	$ - rightBracketError
 
 	tape			times TAPE_SIZE db	0
@@ -115,7 +115,7 @@ interprete:
 	cmp		eax, 0						; Check if any error occurred when jumping forward (missing matching bracket)
 	jne		interprete.readingLoop		; Keep reading the file if no error was found
 
-	call	printLeftBracketError		; Print the missing bracket error
+	call	printRightBracketError		; Print the missing bracket error
 	jmp		interprete.failure			; Exit the procedure with a failure return value
 
 .rightBracket:
@@ -124,7 +124,7 @@ interprete:
 	cmp		eax, 0						; Check if any error occurred when jumping backwards (missing matching bracket)
 	jne		interprete.readingLoop		; Keep reading the file if no error was found
 
-	call	printRightBracketError		; Print the missing bracket error
+	call	printLeftBracketError		; Print the missing bracket error
 	jmp		interprete.failure			; Exit the procedure with a failure return value
 
 .failure:
