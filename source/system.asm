@@ -10,6 +10,7 @@ SYS_WRITE	equ	4
 SYS_OPEN	equ	5
 SYS_CLOSE	equ	6
 SYS_LSEEK	equ	19
+SYS_MMAP	equ	90
 
 ; Status codes
 EXIT_SUCCESS	equ	0
@@ -29,6 +30,20 @@ RDWR	equ	2
 SEEK_SET	equ	0
 SEEK_CUR	equ	1
 SEEK_END	equ	2
+
+; Map protection
+PROT_NONE	equ	0
+PROT_READ	equ	1
+PROT_WRITE	equ	2
+PROT_EXEC	equ	4
+
+; Map flags
+MAP_SHARED			equ	1
+MAP_PRIVATE			equ	2
+MAP_SHARED_VALIDATE	equ	3
+MAP_TYPE			equ	15
+MAP_FIXED			equ	16
+MAP_ANONYMOUS		equ	32
 
 
 
@@ -141,6 +156,24 @@ sysLSeek:
 	mov		esp, ebp		; Clear stack
 	pop		ebp				; Restore base pointer
 	ret						; Return to caller
+
+
+
+sysMMap:
+	push	ebp						; Store base pointer
+	mov		ebp, esp				; Set base pointer to stack pointer
+
+	push	ebx						; Store non-volatile register ebx
+
+	mov		eax, SYS_MMAP			; Set sys_mmap system call number
+	mov		ebx, dword [ebp + 8]	; Load argument struct address
+	int		0x80					; Kernel interrupt
+
+	pop		ebx						; Restore non-volatile register ebx
+
+	mov		esp, ebp				; Clear stack
+	pop		ebp						; Restore base pointer
+	ret								; Return to caller
 
 
 
