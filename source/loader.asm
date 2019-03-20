@@ -10,57 +10,100 @@
 LOAD_SUCCESS		equ	0
 INVALID_PATH		equ	-1
 ZERO_INSTRUCTIONS	equ	-2
+MEMORY_ERROR		equ	-3
 
 
 
 segment .text
 load:
-	push	ebp						; Store base pointer
-	mov		ebp, esp				; Set base pointer to stack pointer
-	sub		esp, 8					; Reserve 4 bytes on the stack for local variables (file descriptor, instruction count)
+	push	ebp											; Store base pointer
+	mov		ebp, esp									; Set base pointer to stack pointer
+	sub		esp, 36										; Reserve 4 bytes on the stack for local variables (file descriptor, instruction count, instructions address, memory map argument structure)
 
-	push	0						; Mode is ignored on read only
+	push	0											; Mode is ignored on read only
 	push	RDONLY
-	push	dword [ebp + 8]			; File path received as argument
-	call	sysOpen					; Open file
-	add		esp, 12					; Clear stack arguments
+	push	dword [ebp + 8]								; File path received as argument
+	call	sysOpen										; Open file
+	add		esp, 12										; Clear stack arguments
 
-	cmp		eax, 0					; Check if the file was open successfully
-	jl		load.invalidPath		; Exit the procedure if the file was not open successfully
+	cmp		eax, 0										; Check if the file was open successfully
+	jl		load.invalidPath							; Exit the procedure if the file was not open successfully
 
-	mov		dword [ebp - 4], eax	; Store file descriptor
+	mov		dword [ebp - 4], eax						; Store file descriptor
 
-	push	dword [ebp - 4]			; Push file descriptor number
-	call	instructionCount		; Count instructions
-	add		esp, 4					; Clear stack arguments
+	push	dword [ebp - 4]								; Push file descriptor number
+	call	instructionCount							; Count instructions
+	add		esp, 4										; Clear stack arguments
 
-	cmp		eax, 0					; Check if zero count
-	je		load.zeroInstructions	; Exit procedure with zero instruction return value
+	cmp		eax, 0										; Check if zero count
+	je		load.zeroInstructions						; Exit procedure with zero instruction return value
 
-	mov		dword [ebp - 8], eax	; Store instruction count
+	mov		dword [ebp - 8], eax						; Store instruction count
 
-	push	dword [ebp - 4]			; Push file descriptor number
-	call	sysClose				; Close the open file descriptor
-	add		esp, 4					; Clear stack arguments
+	lea		eax, [ebp - 16]								; Store the file offset's local variable effective address in register eax
+	mov		dword [eax], 0								; Set file offeset to 0
 
-	jmp		load.success			; Exit the procedure successfully
+	lea		eax, [ebp - 20]								; Store the file descriptor's local variable effective address in register eax
+	mov		dword [eax], -1								; Set file offeset to -1
+
+	lea		eax, [ebp - 24]								; Store the map flags' local variable effective address in register eax
+	mov		dword [eax], MAP_PRIVATE | MAP_ANONYMOUS	; Set map flags to private, and anonymous
+
+	lea		eax, [ebp - 28]								; Store the map protection's local variable effective address in register eax
+	mov		dword [eax], PROT_READ | PROT_WRITE			; Set map protection to read, and write
+
+	lea		eax, [ebp - 32]								; Store the map size's local variable effective address in register eax
+	mov		ecx, dword [ebp - 8]						; Store instruction count in register ecx
+	mov		dword [eax], ecx							; Set map size to instruction count
+
+	lea		eax, [ebp - 36]								; Store the map adress's local variable effective address in register eax
+	mov		dword [eax], 0								; Set map address to 0
+
+	lea		eax, [ebp - 36]								; Store the memory map argument structure's local variable effective address in register eax
+
+	push	eax											; Push memory map argument structure's address
+	call	sysMMap										; Map memory
+	add		esp, 4										; Clear stack arguments
+
+	cmp		eax, 0										; Check if memory was mapped successfully
+	jl		load.memoryError							; Exit the procedure if the memory was not mapped successfully
+
+	mov		dword [ebp - 12], eax						; Store the memory map address in local variable
+
+	jmp		load.success								; Exit the procedure successfully
 
 .invalidPath:
-	mov		eax, INVALID_PATH		; Set the failure return value
-	jmp		load.exit				; Exit the procedure
+	mov		eax, INVALID_PATH							; Set the failure return value
+	jmp		load.exit									; Exit the procedure
 
 .zeroInstructions:
-	mov		eax, ZERO_INSTRUCTIONS	; Set the return value
-	jmp		load.exit				; Exit the procedure
+	push	dword [ebp - 4]								; Push file descriptor number
+	call	sysClose									; Close the open file descriptor
+	add		esp, 4										; Clear stack arguments
+
+	mov		eax, ZERO_INSTRUCTIONS						; Set the return value
+	jmp		load.exit									; Exit the procedure
+
+.memoryError:
+	push	dword [ebp - 4]								; Push file descriptor number
+	call	sysClose									; Close the open file descriptor
+	add		esp, 4										; Clear stack arguments
+
+	mov		eax, MEMORY_ERROR							; Set the return value
+	jmp		load.exit									; Exit the procedure
 
 .success:
-	mov		eax, LOAD_SUCCESS		; Set the success return value
-	jmp		load.exit				; Exit the procedure
+	push	dword [ebp - 4]								; Push file descriptor number
+	call	sysClose									; Close the open file descriptor
+	add		esp, 4										; Clear stack arguments
+
+	mov		eax, LOAD_SUCCESS							; Set the success return value
+	jmp		load.exit									; Exit the procedure
 
 .exit:
-	mov		esp, ebp				; Clear stack
-	pop		ebp						; Restore base pointer
-	ret								; Return to caller
+	mov		esp, ebp									; Clear stack
+	pop		ebp											; Restore base pointer
+	ret													; Return to caller
 
 
 
