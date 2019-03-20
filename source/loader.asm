@@ -65,10 +65,21 @@ load:
 	call	sysMMap										; Map memory
 	add		esp, 4										; Clear stack arguments
 
-	cmp		eax, 0										; Check if memory was mapped successfully
-	jl		load.memoryError							; Exit the procedure if the memory was not mapped successfully
+	cmp		eax, -1										; Check if memory was mapped successfully
+	je		load.memoryError							; Exit the procedure if the memory was not mapped successfully
 
 	mov		dword [ebp - 12], eax						; Store the memory map address in local variable
+
+	push	SEEK_SET
+	push	0
+	push	dword [ebp - 4]
+	call	sysLSeek									; Rewind file
+	add		esp, 12										; Clear stack arguments
+
+	push	dword [ebp - 12]							; Push instruction memory map address
+	push	dword [ebp - 4]								; Push file descriptor
+	call	loadInstructions							; Load instructions
+	add		esp, 8										; Clear stack arguments
 
 	jmp		load.success								; Exit the procedure successfully
 
@@ -158,6 +169,65 @@ instructionCount:
 .exit:
 	mov		eax, dword [ebp - 4]			; Store count in eax to be used as return value
 
+	mov		esp, ebp						; Clear stack
+	pop		ebp								; Restore base pointer
+	ret										; Return to caller
+
+
+
+loadInstructions:
+	push	ebp								; Store base pointer
+	mov		ebp, esp						; Set base pointer to stack pointer
+	sub		esp, 4							; Reserve 4 bytes on the stack for a local variable (current character)
+
+	mov		dword [ebp - 4], 0				; Set initial instruction count to 0
+
+.readingLoop:
+	lea		eax, [ebp - 4]					; Store the current character's local variable effective address in register eax
+	push	1
+	push	eax
+	push	dword [ebp + 8]					; Push the file descriptor
+	call	sysRead							; Read a single byte from the file
+	add		esp, 12							; Clear stack arguments
+
+	cmp		eax, 0							; Check if the read operation read any byte
+	je		loadInstructions.exit			; Exit the procedure successfully when no bytes are left to be read
+
+	cmp		byte [ebp - 4], '>'				; Check if the character read is '>'
+	je		loadInstructions.symbol			; Store instruction
+
+	cmp		byte [ebp - 4], '<'				; Check if the character read is '<'
+	je		loadInstructions.symbol			; Store instruction
+
+	cmp		byte [ebp - 4], '+'				; Check if the character read is '+'
+	je		loadInstructions.symbol			; Store instruction
+
+	cmp		byte [ebp - 4], '-'				; Check if the character read is '-'
+	je		loadInstructions.symbol			; Store instruction
+
+	cmp		byte [ebp - 4], '.'				; Check if the character read is '.'
+	je		loadInstructions.symbol			; Store instruction
+
+	cmp		byte [ebp - 4], ','				; Check if the character read is ','
+	je		loadInstructions.symbol			; Store instruction
+
+	cmp		byte [ebp - 4], '['				; Check if the character read is '['
+	je		loadInstructions.symbol			; Store instruction
+
+	cmp		byte [ebp - 4], ']'				; Check if the character read is ']'
+	je		loadInstructions.symbol			; Store instruction
+
+	jmp 	loadInstructions.readingLoop	; Ignore the character read if it's not a valid symbol
+
+.symbol:
+	mov		al, byte [ebp - 4]				; Store current character in register al
+	mov		ecx, dword [ebp + 12]			; Store current instruction address in register ecx
+	mov		byte [ecx], al					; Store current character in current instruction address
+
+	inc		dword [ebp + 12]				; Increment instruction count
+	jmp		loadInstructions.readingLoop	; Keep reading the file
+
+.exit:
 	mov		esp, ebp						; Clear stack
 	pop		ebp								; Restore base pointer
 	ret										; Return to caller
