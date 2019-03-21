@@ -81,6 +81,14 @@ load:
 	call	loadInstructions							; Load instructions
 	add		esp, 8										; Clear stack arguments
 
+	mov		eax, dword [ebp + 12]						; Store instructions' address parameter in register eax
+	mov		ecx, dword [ebp - 12]						; Store instructions' address' local variable in register ecx
+	mov		dword [eax], ecx							; Store instructions' address in output parameter
+
+	mov		eax, dword [ebp + 16]						; Store instruction count parameter in register eax
+	mov		ecx, dword [ebp - 8]						; Store instruction count local variable in register ecx
+	mov		dword [eax], ecx							; Store instruction count in output parameter
+
 	jmp		load.success								; Exit the procedure successfully
 
 .invalidPath:
