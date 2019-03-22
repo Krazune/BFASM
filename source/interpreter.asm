@@ -22,38 +22,26 @@ segment .data
 
 
 
-segment .bss
-	inputFileDescriptor	resd	1
-
-
-
 segment .text
 interprete:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
-	sub		esp, 4						; Reserve 4 bytes on the stack for a local variable (current character)
+	sub		esp, 8						; Reserve 4 bytes on the stack for local variables (current character, current instruction index)
 
-	push	0							; Mode is ignored on read only
-	push	RDONLY
-	push	dword [ebp + 8]				; File path received as argument
-	call	sysOpen						; Open file
-	add		esp, 12						; Clear stack arguments
-
-	cmp		eax, 0						; Check if the file was open successfully
-	jl		interprete.invalidPath		; Exit the procedure if the file was not open successfully
-
-	mov		[inputFileDescriptor], eax	; Store file descriptor
+	mov		dword [ebp - 8], 0			; Set current instruction index to 0
 
 .readingLoop:
-	lea		eax, [ebp - 4]				; Store the current character's local variable effective address in register eax
-	push	1
-	push	eax
-	push	dword [inputFileDescriptor]
-	call	sysRead						; Read a single byte from the file
-	add		esp, 12						; Clear stack arguments
+	mov		eax, dword [ebp - 8]		; Store current instruction index in register eax
+	cmp		eax, dword [ebp + 16]		; Check if current instruction index is greater or equal to instruction size
+	jge		interprete.success			; Exit procedure successfully if no more instructions
 
-	cmp		eax, 0						; Check if the read operation read any byte
-	je		interprete.success			; Exit the procedure successfully when no bytes are left to be read
+	mov		eax, [ebp + 12]				; Store instructions address in register eax
+	mov		ecx, dword [ebp - 8]		; Store current instruction index in register ecx
+	add		eax, ecx					; Add current instruction index to instructions address
+	mov		al, byte [eax]				; Store character in register al
+	mov		byte [ebp - 4], al			; Store al in current character
+
+	inc		dword [ebp - 8]				; Increment current instruction index
 
 	cmp		byte [ebp - 4], '>'			; Check if the character read is '>'
 	je		interprete.greaterThan		; Process the '>' symbol
@@ -106,7 +94,12 @@ interprete:
 	jmp		interprete.readingLoop		; Keep reading the file
 
 .leftBracket:
+	lea		eax, [ebp - 8]				; Store the current instruction index's local variable effective address in register eax
+	push	eax							; Push current instruction index address
+	push	dword [ebp + 16]			; Push instruction size
+	push	dword [ebp + 12]			; Push instructions' address
 	call	jumpForwards				; Jump forward to the instruction after the matching ']' symbol if the current cell value is 0
+	add		esp, 12						; Clear stack arguments
 
 	cmp		eax, NO_ERROR				; Check if any error occurred when jumping forward (missing matching bracket)
 	je		interprete.readingLoop		; Keep reading the file if no error was found
@@ -114,7 +107,12 @@ interprete:
 	jmp		interprete.exit				; Exit the procedure with a failure return value
 
 .rightBracket:
+	lea		eax, [ebp - 8]				; Store the current instruction index's local variable effective address in register eax
+	push	eax							; Push current instruction index address
+	push	dword [ebp + 16]			; Push instruction size
+	push	dword [ebp + 12]			; Push instructions' address
 	call	jumpBackwards				; Jump backwards to the instruction after the matching '[' symbol if the current cell value is not 0
+	add		esp, 12						; Clear stack arguments
 
 	cmp		eax, NO_ERROR				; Check if any error occurred when jumping backwards (missing matching bracket)
 	je		interprete.readingLoop		; Keep reading the file if no error was found
@@ -126,10 +124,6 @@ interprete:
 	jmp		interprete.exit				; Exit the procedure
 
 .success:
-	push	dword [inputFileDescriptor]
-	call	sysClose					; Close the open file descriptor
-	add		esp, 4						; Clear stack arguments
-
 	mov		eax, NO_ERROR				; Set the success return value
 	jmp		interprete.exit				; Exit the procedure
 
@@ -253,15 +247,24 @@ jumpForwards:
 	mov		dword [ebp - 8], 1			; Set the local variable nesting level to 1
 
 .readingLoop:
-	lea		eax, [ebp - 4]				; Store the nesting level's local variable effective address in register eax
-	push	1
-	push	eax
-	push	dword [inputFileDescriptor]
-	call	sysRead						; Read a single byte from the file
-	add		esp, 12						; Clear stack arguments
+	mov		eax, dword [ebp + 16]		; Store current index address in register eax
+	mov		eax, dword [eax]			; Store current index in register eax
 
-	cmp		eax, 0						; Check if the read operation read any byte
-	je		jumpForwards.error			; Exit the procedure unsuccessfully when no bytes are left to be read
+	cmp		eax, dword [ebp + 12]		; Check if current index is greater or equal to instruction size
+	jge		jumpForwards.error			; Exit procedure with failure return value if no more instructions
+
+	mov		eax, [ebp + 8]				; Store instructions address in register eax
+
+	mov		ecx, dword [ebp + 16]		; Store instructions address's address in register eax
+	mov		ecx, dword [ecx]			; Store current instruction index in register ecx
+
+	add		eax, ecx					; Add current instruction index to instructions address
+
+	mov		al, byte [eax]				; Store character in register al
+	mov		byte [ebp - 4], al			; Store al in current character
+
+	mov		eax, dword [ebp + 16]		; Store current index address in register eax
+	inc		dword [eax]					; Increment current instruction index
 
 	cmp		byte [ebp - 4], '['			; Check if the character read is '['
 	je		jumpForwards.leftBracket	; Increase the nesting level if the character read is '['
@@ -311,21 +314,28 @@ jumpBackwards:
 	mov		dword [ebp - 8], 1			; Set the local variable nesting level to 1
 
 .readingLoop:
-	push	SEEK_CUR
-	push	-2
-	push	dword [inputFileDescriptor]
-	call	sysLSeek					; Move the file pointer back 2 bytes to read the file in reverse
-	add		esp, 12						; Clear stack arguments
+	mov		eax, dword [ebp + 16]		; Store current index address in register eax
+	sub		dword [eax], 2				; Subtract 2 from current index
 
-	cmp		eax, 0						; Check if the seek operation was successfully
-	jl		jumpBackwards.error			; Exit the procedure unsuccessfully if it was not possible to seek to a previous character
+	mov		eax, dword [ebp + 16]		; Store current index address in register eax
+	mov		eax, dword [eax]			; Store current index in register eax
 
-	lea		eax, [ebp - 4]				; Store the nesting level's local variable effective address in register eax
-	push	1
-	push	eax
-	push	dword [inputFileDescriptor]
-	call	sysRead						; Read a single byte from the file
-	add		esp, 12						; Clear stack arguments
+	cmp		eax, 0						; Check if current index is less or equal to 0
+	jle		jumpBackwards.error			; Exit procedure with failure return value if no more instructions
+
+	mov		eax, [ebp + 8]				; Store instructions address in register eax
+
+	mov		ecx, dword [ebp + 16]		; Store instructions address's address in register eax
+	mov		ecx, dword [ecx]			; Store current instruction index in register ecx
+
+	add		eax, ecx					; Add current instruction index to instructions address
+
+	mov		al, byte [eax]				; Store character in register al
+	mov		byte [ebp - 4], al			; Store al in current character
+
+	mov		eax, dword [ebp + 16]		; Store current index address in register eax
+	inc		dword [eax]					; Increment current instruction index
+
 
 	cmp		byte [ebp - 4], '['			; Check if the character read is '['
 	je		jumpBackwards.leftBracket	; Decrease the nesting level if the character read is '['

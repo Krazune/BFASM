@@ -1,4 +1,5 @@
 %include "system.asm"
+%include "loader.asm"
 %include "interpreter.asm"
 
 
@@ -17,11 +18,20 @@ segment .data
 	invalidPathError		db	'Invalid path.', 0xA, 0
 	invalidPathErrorLength	equ	$ - invalidPathError
 
+	memoryError		db	'Memory error.', 0xA, 0
+	memoryErrorLength	equ	$ - memoryError
+
 	leftBracketError		db	'No matching left bracket.', 0xA, 0
 	leftBracketErrorLength	equ	$ - leftBracketError
 
 	rightBracketError		db	'No matching right bracket.', 0xA, 0
 	rightBracketErrorLength	equ	$ - rightBracketError
+
+
+
+segment .bss
+	instructionsAddress	resd	1
+	instructionSize		resd	1
 
 
 
@@ -43,7 +53,24 @@ _start:
 	jmp		_start.successExit			; Exit program with success exit status
 
 .doubleArguments:
-	push	dword [esp + 8]				; Push second argument to be used as parameter to the interpreter
+	push	instructionSize				; Push instruction size's address
+	push	instructionsAddress			; Push instructions address's address
+	push	dword [esp + 16]			; Push second argument to be used as parameter to the interpreter
+	call	load						; Load instructions
+	add		esp, 12						; Clear stack arguments
+
+	cmp		eax, LOAD_INVALID_PATH		; Check if path is invalid
+	je		_start.invalidPath			; Exit program with failure exit status on invalid path
+
+	cmp		eax, ZERO_INSTRUCTIONS		; Check if zero instructions
+	je		_start.successExit			; Exit program with success exit status on zero instructions
+
+	cmp		eax, MEMORY_ERROR			; Check if zero instructions
+	je		_start.memoryError			; Exit program with failure exit status on memory error
+
+	push	dword [instructionSize]		; Push instruction size
+	push	dword [instructionsAddress]	; Push instructions address
+	push	dword [esp + 16]			; Push second argument to be used as parameter to the interpreter
 	call	interprete					; Call interpreter
 
 	cmp		eax, NO_ERROR				; Check for no error return code
@@ -60,6 +87,11 @@ _start:
 
 .invalidPath:
 	call	printInvalidPathError		; Print missing bracket error
+
+	jmp		_start.failureExit			; Exit program with failure exit status
+
+.memoryError:
+	call	printMemoryError			; Print memory error
 
 	jmp		_start.failureExit			; Exit program with failure exit status
 
@@ -128,6 +160,22 @@ printInvalidPathError:
 	mov		esp, ebp				; Clear stack
 	pop		ebp						; Restore base pointer
 	ret								; Return to caller
+
+
+
+printMemoryError:
+	push	ebp					; Store base pointer
+	mov		ebp, esp			; Set base pointer to stack pointer
+
+	push	memoryErrorLength
+	push	memoryError
+	push	STDERR
+	call	sysWrite			; Print memory error
+	add		esp, 12				; Clear stack arguments
+
+	mov		esp, ebp			; Clear stack
+	pop		ebp					; Restore base pointer
+	ret							; Return to caller
 
 
 
