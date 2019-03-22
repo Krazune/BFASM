@@ -8,7 +8,7 @@
 
 
 LOAD_SUCCESS		equ	0
-INVALID_PATH		equ	-1
+LOAD_INVALID_PATH	equ	-1
 ZERO_INSTRUCTIONS	equ	-2
 MEMORY_ERROR		equ	-3
 
@@ -92,7 +92,7 @@ load:
 	jmp		load.success								; Exit the procedure successfully
 
 .invalidPath:
-	mov		eax, INVALID_PATH							; Set the failure return value
+	mov		eax, LOAD_INVALID_PATH						; Set the failure return value
 	jmp		load.exit									; Exit the procedure
 
 .zeroInstructions:
