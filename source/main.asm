@@ -68,6 +68,12 @@ _start:
 	cmp		eax, MEMORY_ERROR			; Check if zero instructions
 	je		_start.memoryError			; Exit program with failure exit status on memory error
 
+	cmp		eax, MISSING_LEFT_BRACKET	; Check for missing left bracket return code
+	je		_start.missingLeftBracket	; Print missing bracket error and exit program
+
+	cmp		eax, MISSING_RIGHT_BRACKET	; Check for missing right bracket return code
+	je		_start.missingRightBracket	; Print missing bracket error and exit program
+
 	push	dword [instructionSize]		; Push instruction size
 	push	dword [instructionsAddress]	; Push instructions address
 	push	dword [esp + 16]			; Push second argument to be used as parameter to the interpreter
