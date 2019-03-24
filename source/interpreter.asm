@@ -9,8 +9,6 @@
 
 NO_ERROR				equ	0
 INVALID_PATH			equ	-1
-MISSING_LEFT_BRACKET	equ	-2
-MISSING_RIGHT_BRACKET	equ	-3
 
 TAPE_SIZE		equ	30000
 
@@ -247,12 +245,6 @@ jumpForwards:
 	mov		dword [ebp - 8], 1			; Set the local variable nesting level to 1
 
 .readingLoop:
-	mov		eax, dword [ebp + 16]		; Store current index address in register eax
-	mov		eax, dword [eax]			; Store current index in register eax
-
-	cmp		eax, dword [ebp + 12]		; Check if current index is greater or equal to instruction size
-	jge		jumpForwards.error			; Exit procedure with failure return value if no more instructions
-
 	mov		eax, [ebp + 8]				; Store instructions address in register eax
 
 	mov		ecx, dword [ebp + 16]		; Store instructions address's address in register eax
@@ -286,10 +278,6 @@ jumpForwards:
 
 	jmp		jumpForwards.success		; If the nesting level is 0 exit the procedure successfully
 
-.error:
-	mov		eax, MISSING_RIGHT_BRACKET	; Set the missing bracket error return value
-	jmp		jumpForwards.exit			; Exit the procedure
-
 .success:
 	mov		eax, NO_ERROR				; Set the successfully return value
 	jmp		jumpForwards.exit			; Exit the procedure
@@ -316,12 +304,6 @@ jumpBackwards:
 .readingLoop:
 	mov		eax, dword [ebp + 16]		; Store current index address in register eax
 	sub		dword [eax], 2				; Subtract 2 from current index
-
-	mov		eax, dword [ebp + 16]		; Store current index address in register eax
-	mov		eax, dword [eax]			; Store current index in register eax
-
-	cmp		eax, 0						; Check if current index is less or equal to 0
-	jle		jumpBackwards.error			; Exit procedure with failure return value if no more instructions
 
 	mov		eax, [ebp + 8]				; Store instructions address in register eax
 
@@ -356,10 +338,6 @@ jumpBackwards:
 .rightBracket:
 	inc		dword [ebp - 8]				; Increment the nesting level
 	jmp		jumpBackwards.readingLoop	; Keep reading the file
-
-.error:
-	mov		eax, MISSING_LEFT_BRACKET	; Set the missing bracket error return value
-	jmp		jumpBackwards.exit			; Exit the procedure
 
 .success:
 	mov		eax, NO_ERROR				; Set the successfully return value
