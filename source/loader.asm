@@ -7,10 +7,12 @@
 
 
 
-LOAD_SUCCESS		equ	0
-LOAD_INVALID_PATH	equ	-1
-ZERO_INSTRUCTIONS	equ	-2
-MEMORY_ERROR		equ	-3
+LOAD_SUCCESS			equ	0
+LOAD_INVALID_PATH		equ	-1
+ZERO_INSTRUCTIONS		equ	-2
+MEMORY_ERROR			equ	-3
+MISSING_LEFT_BRACKET	equ	-4
+MISSING_RIGHT_BRACKET	equ	-5
 
 
 
@@ -81,6 +83,12 @@ load:
 	call	loadInstructions							; Load instructions
 	add		esp, 8										; Clear stack arguments
 
+	cmp		eax, MISSING_LEFT_BRACKET					; Check for missing left bracket return value
+	je		load.missingLeftBracket						; Exit procedure with error return value on missing bracket
+
+	cmp		eax, MISSING_RIGHT_BRACKET					; Check for missing right bracket return value
+	je		load.missingRightBracket					; Exit procedure with error return value on missing bracket
+
 	mov		eax, dword [ebp + 12]						; Store instructions' address parameter in register eax
 	mov		ecx, dword [ebp - 12]						; Store instructions' address' local variable in register ecx
 	mov		dword [eax], ecx							; Store instructions' address in output parameter
@@ -110,6 +118,22 @@ load:
 
 	mov		eax, MEMORY_ERROR							; Set the return value
 	jmp		load.exit									; Exit the procedure
+
+.missingLeftBracket:
+	push	dword [ebp - 4]								; Push file descriptor number
+	call	sysClose									; Close the open file descriptor
+	add		esp, 4										; Clear stack arguments
+
+	mov		eax, MISSING_LEFT_BRACKET					; Set the return value
+	jmp		load.exit									; Exit procedure
+
+.missingRightBracket:
+	push	dword [ebp - 4]								; Push file descriptor number
+	call	sysClose									; Close the open file descriptor
+	add		esp, 4										; Clear stack arguments
+
+	mov		eax, MISSING_RIGHT_BRACKET					; Set the return value
+	jmp		load.exit									; Exit procedure
 
 .success:
 	push	dword [ebp - 4]								; Push file descriptor number
@@ -184,61 +208,91 @@ instructionCount:
 
 
 loadInstructions:
-	push	ebp								; Store base pointer
-	mov		ebp, esp						; Set base pointer to stack pointer
-	sub		esp, 4							; Reserve 4 bytes on the stack for a local variable (current character)
+	push	ebp										; Store base pointer
+	mov		ebp, esp								; Set base pointer to stack pointer
+	sub		esp, 8									; Reserve 8 bytes on the stack for local variables (current character, and nesting level)
 
-	mov		dword [ebp - 4], 0				; Set initial instruction count to 0
+	mov		dword [ebp - 4], 0						; Set initial instruction count to 0
+	mov		dword [ebp - 8], 0						; Set initial nesting level to 0
 
 .readingLoop:
-	lea		eax, [ebp - 4]					; Store the current character's local variable effective address in register eax
+	lea		eax, [ebp - 4]							; Store the current character's local variable effective address in register eax
 	push	1
 	push	eax
-	push	dword [ebp + 8]					; Push the file descriptor
-	call	sysRead							; Read a single byte from the file
-	add		esp, 12							; Clear stack arguments
+	push	dword [ebp + 8]							; Push the file descriptor
+	call	sysRead									; Read a single byte from the file
+	add		esp, 12									; Clear stack arguments
 
-	cmp		eax, 0							; Check if the read operation read any byte
-	je		loadInstructions.exit			; Exit the procedure successfully when no bytes are left to be read
+	cmp		eax, 0									; Check if the read operation read any byte
+	je		loadInstructions.checkNesting			; Check nesting level if no byte was read
 
-	cmp		byte [ebp - 4], '>'				; Check if the character read is '>'
-	je		loadInstructions.symbol			; Store instruction
+	cmp		byte [ebp - 4], '>'						; Check if the character read is '>'
+	je		loadInstructions.symbol					; Store instruction
 
-	cmp		byte [ebp - 4], '<'				; Check if the character read is '<'
-	je		loadInstructions.symbol			; Store instruction
+	cmp		byte [ebp - 4], '<'						; Check if the character read is '<'
+	je		loadInstructions.symbol					; Store instruction
 
-	cmp		byte [ebp - 4], '+'				; Check if the character read is '+'
-	je		loadInstructions.symbol			; Store instruction
+	cmp		byte [ebp - 4], '+'						; Check if the character read is '+'
+	je		loadInstructions.symbol					; Store instruction
 
-	cmp		byte [ebp - 4], '-'				; Check if the character read is '-'
-	je		loadInstructions.symbol			; Store instruction
+	cmp		byte [ebp - 4], '-'						; Check if the character read is '-'
+	je		loadInstructions.symbol					; Store instruction
 
-	cmp		byte [ebp - 4], '.'				; Check if the character read is '.'
-	je		loadInstructions.symbol			; Store instruction
+	cmp		byte [ebp - 4], '.'						; Check if the character read is '.'
+	je		loadInstructions.symbol					; Store instruction
 
-	cmp		byte [ebp - 4], ','				; Check if the character read is ','
-	je		loadInstructions.symbol			; Store instruction
+	cmp		byte [ebp - 4], ','						; Check if the character read is ','
+	je		loadInstructions.symbol					; Store instruction
 
-	cmp		byte [ebp - 4], '['				; Check if the character read is '['
-	je		loadInstructions.symbol			; Store instruction
+	cmp		byte [ebp - 4], '['						; Check if the character read is '['
+	je		loadInstructions.leftBracket			; Process left bracket
 
-	cmp		byte [ebp - 4], ']'				; Check if the character read is ']'
-	je		loadInstructions.symbol			; Store instruction
+	cmp		byte [ebp - 4], ']'						; Check if the character read is ']'
+	je		loadInstructions.rightBracket			; Process left bracket
 
-	jmp 	loadInstructions.readingLoop	; Ignore the character read if it's not a valid symbol
+	jmp 	loadInstructions.readingLoop			; Ignore the character read if it's not a valid symbol
 
 .symbol:
-	mov		al, byte [ebp - 4]				; Store current character in register al
-	mov		ecx, dword [ebp + 12]			; Store current instruction address in register ecx
-	mov		byte [ecx], al					; Store current character in current instruction address
+	mov		al, byte [ebp - 4]						; Store current character in register al
+	mov		ecx, dword [ebp + 12]					; Store current instruction address in register ecx
+	mov		byte [ecx], al							; Store current character in current instruction address
 
-	inc		dword [ebp + 12]				; Increment instruction count
-	jmp		loadInstructions.readingLoop	; Keep reading the file
+	inc		dword [ebp + 12]						; Increment instruction count
+	jmp		loadInstructions.readingLoop			; Keep reading the file
+
+.leftBracket:
+	inc		dword [ebp - 8]							; Increment nesting level
+	jmp		loadInstructions.symbol					; Keep reading the file
+
+.rightBracket:
+	dec		dword [ebp - 8]							; Decrement nesting level
+
+	cmp		dword [ebp - 8], 0						; Check if nesting level is below 0
+	jl		loadInstructions.missingLeftBracket		; Exit the procedure with error return value if negative nesting level
+
+	jmp		loadInstructions.symbol					; Process symbol
+
+.checkNesting:
+	cmp		dword [ebp - 8], 0						; Check if nesting is 0
+	je		loadInstructions.success				; Exit the procedure successfully if nesting level is 0
+
+	jmp		loadInstructions.missingRightBracket	; Exit the procedure with error return value nesting level is greater than 0
+
+.missingLeftBracket:
+	mov		eax, MISSING_LEFT_BRACKET				; Set return value
+	jmp		loadInstructions.exit					; Exit procedure
+
+.missingRightBracket:
+	mov		eax, MISSING_RIGHT_BRACKET				; Set return value
+	jmp		loadInstructions.exit					; Exit procedure
+
+.success:
+	mov		eax, LOAD_SUCCESS						; Set return value
 
 .exit:
-	mov		esp, ebp						; Clear stack
-	pop		ebp								; Restore base pointer
-	ret										; Return to caller
+	mov		esp, ebp								; Clear stack
+	pop		ebp										; Restore base pointer
+	ret												; Return to caller
 
 
 
