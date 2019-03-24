@@ -79,12 +79,6 @@ _start:
 	cmp		eax, INVALID_PATH			; Check for invalid path return code
 	je		_start.invalidPath			; Print invalid path error and exit program
 
-	cmp		eax, MISSING_LEFT_BRACKET	; Check for missing left bracket return code
-	je		_start.missingLeftBracket	; Print missing bracket error and exit program
-
-	cmp		eax, MISSING_RIGHT_BRACKET	; Check for missing right bracket return code
-	je		_start.missingRightBracket	; Print missing bracket error and exit program
-
 .invalidPath:
 	call	printInvalidPathError		; Print missing bracket error
 
