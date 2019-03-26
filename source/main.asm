@@ -9,10 +9,10 @@ global _start
 
 
 segment .data
-	helpMessage			db	'BFASM: Brainfuck interpreter for the IA-32 architecture.', 0xA, 'Usage: bfasm <path>', 0xA, 'Version: 2019.03.1', 0xA, 0
+	helpMessage			db	'BFASM: Brainfuck interpreter for the IA-32 architecture.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 'Version: 2019.03.1', 0xA, 0
 	helpMessageLength	equ	$ - helpMessage
 
-	invalidArgumentCountMessage			db	'Invalid argument count.', 0xA, 'Usage: bfasm <path>', 0xA, 0
+	invalidArgumentCountMessage			db	'Invalid argument count.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 0
 	invalidArgumentCountMessageLength	equ	$ - invalidArgumentCountMessage
 
 	invalidPathError		db	'Invalid path.', 0xA, 0
@@ -26,6 +26,11 @@ segment .data
 
 	rightBracketError		db	'No matching right bracket.', 0xA, 0
 	rightBracketErrorLength	equ	$ - rightBracketError
+
+	invalidTapeSizeError		db	'Invalid tape size.', 0xA, 0
+	invalidTapeSizeErrorLength	equ	$ - invalidTapeSizeError
+
+	tapeSize	dd	30000
 
 
 
@@ -42,6 +47,9 @@ _start:
 
 	cmp		dword [esp], 2				; Check for double command line arguments
 	je		_start.doubleArguments		; Call interpreter if double arguments
+
+	cmp		dword [esp], 3				; Check for triple command line arguments
+	je		_start.tripleArguments		; Call interpreter if triple arguments
 
 	call	printArgumentCountError		; Print error if the argument count is greater than 2
 
@@ -74,6 +82,7 @@ _start:
 	cmp		eax, MISSING_RIGHT_BRACKET	; Check for missing right bracket return code
 	je		_start.missingRightBracket	; Print missing bracket error and exit program
 
+	push	dword [tapeSize]			; Push tape size
 	push	dword [instructionSize]		; Push instruction size
 	push	dword [instructionsAddress]	; Push instructions address
 	push	dword [esp + 16]			; Push second argument to be used as parameter to the interpreter
@@ -85,8 +94,28 @@ _start:
 	cmp		eax, INVALID_PATH			; Check for invalid path return code
 	je		_start.invalidPath			; Print invalid path error and exit program
 
+	cmp		eax, TAPE_MEMORY_ERROR		; Check for memory error return code
+	je		_start.memoryError			; Print memory error and exit program
+
+.tripleArguments:
+	push	dword [esp + 12]			; Push tape size string
+	call	stoi						; Convert tape size string to integer
+	add		esp, 4						; Clear stack arguments
+
+	cmp		eax, -1						; Check if the string was converted successfully
+	je		_start.invalidTapeSize		; Print invalid tape size error and exit program
+
+	mov		dword [tapeSize], eax		; Store tape size in tape size global variable
+
+	jmp		_start.doubleArguments		; Call interpreter with the rest of the arguments
+
 .invalidPath:
 	call	printInvalidPathError		; Print missing bracket error
+
+	jmp		_start.failureExit			; Exit program with failure exit status
+
+.invalidTapeSize:
+	call	printInvalidTapeSizeError	; Print memory error
 
 	jmp		_start.failureExit			; Exit program with failure exit status
 
@@ -205,6 +234,65 @@ printRightBracketError:
 	call	sysWrite				; Print missing left bracket error
 	add		esp, 12					; Clear stack arguments
 
+	mov		esp, ebp				; Clear stack
+	pop		ebp						; Restore base pointer
+	ret								; Return to caller
+
+
+
+printInvalidTapeSizeError:
+	push	ebp							; Store base pointer
+	mov		ebp, esp					; Set base pointer to stack pointer
+
+	push	invalidTapeSizeErrorLength
+	push	invalidTapeSizeError
+	push	STDERR
+	call	sysWrite					; Print missing left bracket error
+	add		esp, 12						; Clear stack arguments
+
+	mov		esp, ebp					; Clear stack
+	pop		ebp							; Restore base pointer
+	ret									; Return to caller
+
+
+
+stoi:
+	push	ebp						; Store base pointer
+	mov		ebp, esp				; Set base pointer to stack pointer
+
+	mov		ecx, dword [ebp + 8]	; Load string address in register ecx
+	cmp		byte [ecx], 0			; Check if first character is 0
+	je		stoi.error				; Exit the procedure with a failure return value
+
+	mov		eax, 0					; Set initial value to 0
+
+.convertLoop:
+	mov		ecx, dword [ebp + 8]	; Load current character address in register ecx
+	movzx	ecx, byte [ecx]			; Store current character in register ecx
+
+	cmp		ecx, 0					; Check if first character is 0
+	je		stoi.exit				; Exit the procedure
+
+	sub		ecx, '0'				; Convert character to digit
+
+	cmp		ecx, 0					; Check if digit is below 0
+	jl		stoi.error				; Exit the procedure with a failure return value
+
+	cmp		ecx, 9					; Check if digit is above 9
+	jg		stoi.error				; Exit the procedure with a failure return value
+
+	mov		edx, 10					; Store 10 in register edx
+	mul		edx						; Multiply current value by 10
+	add		eax, ecx				; Add digit value to current value
+
+	inc		dword [ebp + 8]			; Increment current character address
+
+	jmp		stoi.convertLoop		; Keep converting the integer
+
+.error:
+	mov		eax, -1					; Set the failure return value
+
+.exit:
 	mov		esp, ebp				; Clear stack
 	pop		ebp						; Restore base pointer
 	ret								; Return to caller
