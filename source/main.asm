@@ -100,9 +100,6 @@ _start:
 	cmp		eax, NO_ERROR				; Check for no error return code
 	je		_start.successExit			; Exit program with success exit status
 
-	cmp		eax, INVALID_PATH			; Check for invalid path return code
-	je		_start.invalidPath			; Print invalid path error and exit program
-
 	cmp		eax, TAPE_MEMORY_ERROR		; Check for memory error return code
 	je		_start.memoryError			; Print memory error and exit program
 

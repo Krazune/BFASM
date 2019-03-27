@@ -10,8 +10,7 @@
 
 
 NO_ERROR			equ	0
-INVALID_PATH		equ	-1
-TAPE_MEMORY_ERROR	equ -2
+TAPE_MEMORY_ERROR	equ -1
 
 
 
@@ -158,10 +157,6 @@ interprete:
 	je		interprete.readingLoop						; Keep reading the file if no error was found
 
 	jmp		interprete.exit								; Exit the procedure with a failure return value
-
-.invalidPath:
-	mov		eax, INVALID_PATH							; Set the failure return value
-	jmp		interprete.exit								; Exit the procedure
 
 .memoryError:
 	mov		eax, TAPE_MEMORY_ERROR						; Set the failure return value
