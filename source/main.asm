@@ -87,6 +87,7 @@ _start:
 	push	dword [instructionsAddress]	; Push instructions address
 	push	dword [esp + 16]			; Push second argument to be used as parameter to the interpreter
 	call	interprete					; Call interpreter
+	add		esp, 16						; Clear stack arguments
 
 	cmp		eax, NO_ERROR				; Check for no error return code
 	je		_start.successExit			; Exit program with success exit status
