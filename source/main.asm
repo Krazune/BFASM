@@ -8,7 +8,7 @@ global _start
 
 
 
-segment .data
+segment .rodata
 	helpMessage			db	'BFASM: Brainfuck interpreter for the IA-32 architecture.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 'Version: 2019.03.1', 0xA, 0
 	helpMessageLength	equ	$ - helpMessage
 
@@ -30,6 +30,9 @@ segment .data
 	invalidTapeSizeError		db	'Invalid tape size.', 0xA, 0
 	invalidTapeSizeErrorLength	equ	$ - invalidTapeSizeError
 
+
+
+segment .data
 	tapeSize	dd	30000
 
 
