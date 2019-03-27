@@ -3,7 +3,9 @@
 
 
 
+
 %include "system.asm"
+
 
 
 
@@ -13,14 +15,17 @@ TAPE_MEMORY_ERROR		equ -2
 
 
 
+
 segment .data
 	cellIndex		dd	0
+
 
 
 
 segment .bss
 	tapeAddress	resd	1
 	size		resd	1
+
 
 
 
@@ -173,6 +178,7 @@ interprete:
 
 
 
+
 incrementCellIndex:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -190,6 +196,7 @@ incrementCellIndex:
 	mov		esp, ebp				; Clear stack
 	pop		ebp						; Restore base pointer
 	ret								; Return to caller
+
 
 
 
@@ -214,6 +221,7 @@ decrementCellIndex:
 
 
 
+
 incrementCellValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -229,6 +237,7 @@ incrementCellValue:
 
 
 
+
 decrementCellValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -241,6 +250,7 @@ decrementCellValue:
 	mov		esp, ebp					; Clear stack
 	pop		ebp							; Restore base pointer
 	ret									; Return to caller
+
 
 
 
@@ -263,6 +273,7 @@ printValue:
 
 
 
+
 getValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -282,6 +293,7 @@ getValue:
 	mov		esp, ebp					; Clear stack
 	pop		ebp							; Restore base pointer
 	ret									; Return to caller
+
 
 
 
@@ -341,6 +353,7 @@ jumpForwards:
 	mov		esp, ebp					; Clear stack
 	pop		ebp							; Restore base pointer
 	ret									; Return to caller
+
 
 
 
@@ -404,6 +417,7 @@ jumpBackwards:
 	mov		esp, ebp					; Clear stack
 	pop		ebp							; Restore base pointer
 	ret									; Return to caller
+
 
 
 

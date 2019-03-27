@@ -4,7 +4,9 @@
 
 
 
+
 global _start
+
 
 
 
@@ -32,14 +34,17 @@ segment .rodata
 
 
 
+
 segment .data
 	tapeSize	dd	30000
+
 
 
 
 segment .bss
 	instructionsAddress	resd	1
 	instructionSize		resd	1
+
 
 
 
@@ -148,6 +153,7 @@ _start:
 
 
 
+
 printInformation:
 	push	ebp					; Store base pointer
 	mov		ebp, esp			; Set base pointer to stack pointer
@@ -161,6 +167,7 @@ printInformation:
 	mov		esp, ebp			; Clear stack
 	pop		ebp					; Restore base pointer
 	ret							; Return to caller
+
 
 
 
@@ -180,6 +187,7 @@ printArgumentCountError:
 
 
 
+
 printInvalidPathError:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -193,6 +201,7 @@ printInvalidPathError:
 	mov		esp, ebp				; Clear stack
 	pop		ebp						; Restore base pointer
 	ret								; Return to caller
+
 
 
 
@@ -212,6 +221,7 @@ printMemoryError:
 
 
 
+
 printLeftBracketError:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -225,6 +235,7 @@ printLeftBracketError:
 	mov		esp, ebp				; Clear stack
 	pop		ebp						; Restore base pointer
 	ret								; Return to caller
+
 
 
 
@@ -244,6 +255,7 @@ printRightBracketError:
 
 
 
+
 printInvalidTapeSizeError:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -257,6 +269,7 @@ printInvalidTapeSizeError:
 	mov		esp, ebp					; Clear stack
 	pop		ebp							; Restore base pointer
 	ret									; Return to caller
+
 
 
 

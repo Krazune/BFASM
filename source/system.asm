@@ -3,6 +3,7 @@
 
 
 
+
 ; System calls
 SYS_EXIT	equ	1
 SYS_READ	equ	3
@@ -47,6 +48,7 @@ MAP_ANONYMOUS		equ	32
 
 
 
+
 sysExit:
 	push	ebp			; Store base pointer
 	mov		ebp, esp	; Set base pointer to stack pointer
@@ -58,6 +60,7 @@ sysExit:
 	mov		esp, ebp	; Unreachable code
 	pop		ebp			; Unreachable code
 	ret					; Unreachable code
+
 
 
 
@@ -81,6 +84,7 @@ sysRead:
 
 
 
+
 sysWrite:
 	push	ebp				; Store base pointer
 	mov		ebp, esp		; Set base pointer to stack pointer
@@ -98,6 +102,7 @@ sysWrite:
 	mov		esp, ebp		; Clear stack
 	pop		ebp				; Restore base pointer
 	ret						; Return to caller
+
 
 
 
@@ -121,6 +126,7 @@ sysOpen:
 
 
 
+
 sysClose:
 	push	ebp				; Store base pointer
 	mov		ebp, esp		; Set base pointer to stack pointer
@@ -136,6 +142,7 @@ sysClose:
 	mov		esp, ebp		; Clear stack
 	pop		ebp				; Restore base pointer
 	ret						; Return to caller
+
 
 
 
@@ -159,6 +166,7 @@ sysLSeek:
 
 
 
+
 sysMMap:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -174,6 +182,7 @@ sysMMap:
 	mov		esp, ebp				; Clear stack
 	pop		ebp						; Restore base pointer
 	ret								; Return to caller
+
 
 
 

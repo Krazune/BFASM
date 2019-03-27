@@ -3,7 +3,9 @@
 
 
 
+
 %include "system.asm"
+
 
 
 
@@ -13,6 +15,7 @@ ZERO_INSTRUCTIONS		equ	-2
 MEMORY_ERROR			equ	-3
 MISSING_LEFT_BRACKET	equ	-4
 MISSING_RIGHT_BRACKET	equ	-5
+
 
 
 
@@ -150,6 +153,7 @@ load:
 
 
 
+
 instructionCount:
 	push	ebp								; Store base pointer
 	mov		ebp, esp						; Set base pointer to stack pointer
@@ -204,6 +208,7 @@ instructionCount:
 	mov		esp, ebp						; Clear stack
 	pop		ebp								; Restore base pointer
 	ret										; Return to caller
+
 
 
 
@@ -293,6 +298,7 @@ loadInstructions:
 	mov		esp, ebp								; Clear stack
 	pop		ebp										; Restore base pointer
 	ret												; Return to caller
+
 
 
 
