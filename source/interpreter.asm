@@ -9,15 +9,15 @@
 
 
 
-NO_ERROR				equ	0
-INVALID_PATH			equ	-1
-TAPE_MEMORY_ERROR		equ -2
+NO_ERROR			equ	0
+INVALID_PATH		equ	-1
+TAPE_MEMORY_ERROR	equ -2
 
 
 
 
 segment .data
-	cellIndex		dd	0
+	cellIndex	dd	0
 
 
 
@@ -107,7 +107,7 @@ interprete:
 	cmp		byte [ebp - 4], ']'							; Check if the character read is ']'
 	je		interprete.rightBracket						; Process the ']' symbol
 
-	jmp interprete.readingLoop							; Ignore the character read if it's not a valid symbol
+	jmp		interprete.readingLoop						; Ignore the character read if it's not a valid symbol
 
 .greaterThan:
 	call	incrementCellIndex							; Increment the cell index

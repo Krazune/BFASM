@@ -11,26 +11,26 @@ global _start
 
 
 segment .rodata
-	helpMessage			db	'BFASM: Brainfuck interpreter for the IA-32 architecture.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 'Version: 2019.03.1', 0xA, 0
-	helpMessageLength	equ	$ - helpMessage
+	helpMessage							db	'BFASM: Brainfuck interpreter for the IA-32 architecture.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 'Version: 2019.03.1', 0xA, 0
+	helpMessageLength					equ	$ - helpMessage
 
 	invalidArgumentCountMessage			db	'Invalid argument count.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 0
 	invalidArgumentCountMessageLength	equ	$ - invalidArgumentCountMessage
 
-	invalidPathError		db	'Invalid path.', 0xA, 0
-	invalidPathErrorLength	equ	$ - invalidPathError
+	invalidPathError					db	'Invalid path.', 0xA, 0
+	invalidPathErrorLength				equ	$ - invalidPathError
 
-	memoryError		db	'Memory error.', 0xA, 0
-	memoryErrorLength	equ	$ - memoryError
+	memoryError							db	'Memory error.', 0xA, 0
+	memoryErrorLength					equ	$ - memoryError
 
-	leftBracketError		db	'No matching left bracket.', 0xA, 0
-	leftBracketErrorLength	equ	$ - leftBracketError
+	leftBracketError					db	'No matching left bracket.', 0xA, 0
+	leftBracketErrorLength				equ	$ - leftBracketError
 
-	rightBracketError		db	'No matching right bracket.', 0xA, 0
-	rightBracketErrorLength	equ	$ - rightBracketError
+	rightBracketError					db	'No matching right bracket.', 0xA, 0
+	rightBracketErrorLength				equ	$ - rightBracketError
 
-	invalidTapeSizeError		db	'Invalid tape size.', 0xA, 0
-	invalidTapeSizeErrorLength	equ	$ - invalidTapeSizeError
+	invalidTapeSizeError				db	'Invalid tape size.', 0xA, 0
+	invalidTapeSizeErrorLength			equ	$ - invalidTapeSizeError
 
 
 

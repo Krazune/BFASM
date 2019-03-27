@@ -5,38 +5,38 @@
 
 
 ; System calls
-SYS_EXIT	equ	1
-SYS_READ	equ	3
-SYS_WRITE	equ	4
-SYS_OPEN	equ	5
-SYS_CLOSE	equ	6
-SYS_LSEEK	equ	19
-SYS_MMAP	equ	90
+SYS_EXIT			equ	1
+SYS_READ			equ	3
+SYS_WRITE			equ	4
+SYS_OPEN			equ	5
+SYS_CLOSE			equ	6
+SYS_LSEEK			equ	19
+SYS_MMAP			equ	90
 
 ; Status codes
-EXIT_SUCCESS	equ	0
-EXIT_FAILURE	equ	1
+EXIT_SUCCESS		equ	0
+EXIT_FAILURE		equ	1
 
 ; Standard file descriptors
-STDIN	equ	0
-STDOUT	equ	1
-STDERR	equ	2
+STDIN				equ	0
+STDOUT				equ	1
+STDERR				equ	2
 
 ; File flags
-RDONLY	equ	0
-WRONLY	equ	1
-RDWR	equ	2
+RDONLY				equ	0
+WRONLY				equ	1
+RDWR				equ	2
 
 ; File origin
-SEEK_SET	equ	0
-SEEK_CUR	equ	1
-SEEK_END	equ	2
+SEEK_SET			equ	0
+SEEK_CUR			equ	1
+SEEK_END			equ	2
 
 ; Map protection
-PROT_NONE	equ	0
-PROT_READ	equ	1
-PROT_WRITE	equ	2
-PROT_EXEC	equ	4
+PROT_NONE			equ	0
+PROT_READ			equ	1
+PROT_WRITE			equ	2
+PROT_EXEC			equ	4
 
 ; Map flags
 MAP_SHARED			equ	1
@@ -50,16 +50,16 @@ MAP_ANONYMOUS		equ	32
 
 
 sysExit:
-	push	ebp			; Store base pointer
-	mov		ebp, esp	; Set base pointer to stack pointer
+	push	ebp				; Store base pointer
+	mov		ebp, esp		; Set base pointer to stack pointer
 
-	mov	eax, SYS_EXIT	; Set sys_exit system call number
-	mov	ebx, [ebp + 8]	; Use parameter as exit status
-	int	0x80			; Kernel interrupt
+	mov		eax, SYS_EXIT	; Set sys_exit system call number
+	mov		ebx, [ebp + 8]	; Use parameter as exit status
+	int		0x80			; Kernel interrupt
 
-	mov		esp, ebp	; Unreachable code
-	pop		ebp			; Unreachable code
-	ret					; Unreachable code
+	mov		esp, ebp		; Unreachable code
+	pop		ebp				; Unreachable code
+	ret						; Unreachable code
 
 
 
