@@ -217,7 +217,6 @@ loadInstructions:
 	mov		ebp, esp								; Set base pointer to stack pointer
 	sub		esp, 8									; Reserve 8 bytes on the stack for local variables (current character, and nesting level)
 
-	mov		dword [ebp - 4], 0						; Set initial instruction count to 0
 	mov		dword [ebp - 8], 0						; Set initial nesting level to 0
 
 .readingLoop:
