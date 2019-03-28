@@ -10,47 +10,47 @@
 
 
 
-; System calls
-SYS_EXIT				equ	1
-SYS_READ				equ	3
-SYS_WRITE				equ	4
-SYS_OPEN				equ	5
-SYS_CLOSE				equ	6
-SYS_LSEEK				equ	19
-SYS_MMAP				equ	90
+; System calls' values
+SYS_EXIT				equ	1	; Terminate the calling process with exit status.
+SYS_READ				equ	3	; Read from a file descriptor.
+SYS_WRITE				equ	4	; Write to a file descriptor.
+SYS_OPEN				equ	5	; Open and possibly create a file.
+SYS_CLOSE				equ	6	; Close a file descriptor.
+SYS_LSEEK				equ	19	; Reposition read/write file offset.
+SYS_MMAP				equ	90	; Map files or devices into memory.
 
-; Status codes
-SYS_EXIT_SUCCESS		equ	0
-SYS_EXIT_FAILURE		equ	1
+; Program exit status codes
+SYS_EXIT_SUCCESS		equ	0	; Successful execution of a program.
+SYS_EXIT_FAILURE		equ	1	; Unsuccessful execution of a program.
 
 ; Standard file descriptors
-SYS_STDIN				equ	0
-SYS_STDOUT				equ	1
-SYS_STDERR				equ	2
+SYS_STDIN				equ	0	; Standard input stream.
+SYS_STDOUT				equ	1	; Standard output stream.
+SYS_STDERR				equ	2	; Standard error stream.
 
 ; File flags
-SYS_RDONLY				equ	0
-SYS_WRONLY				equ	1
-SYS_RDWR				equ	2
+SYS_RDONLY				equ	0	; File may be read.
+SYS_WRONLY				equ	1	; File may be written.
+SYS_RDWR				equ	2	; File may be read, and written.
 
 ; File origin
-SYS_SEEK_SET			equ	0
-SYS_SEEK_CUR			equ	1
-SYS_SEEK_END			equ	2
+SYS_SEEK_SET			equ	0	; Offset starts at the beginning of the file.
+SYS_SEEK_CUR			equ	1	; Offset starts at the current position.
+SYS_SEEK_END			equ	2	; Offset starts at the end of the file.
 
-; Map protection
-SYS_PROT_NONE			equ	0
-SYS_PROT_READ			equ	1
-SYS_PROT_WRITE			equ	2
-SYS_PROT_EXEC			equ	4
+; Map permissions
+SYS_PROT_NONE			equ	0	; Mapping may not be accessed.
+SYS_PROT_READ			equ	1	; Mapping may be read.
+SYS_PROT_WRITE			equ	2	; Mapping may be written.
+SYS_PROT_EXEC			equ	4	; Mapping may be executed.
 
 ; Map flags
-SYS_MAP_SHARED			equ	1
-SYS_MAP_PRIVATE			equ	2
-SYS_MAP_SHARED_VALIDATE	equ	3
-SYS_MAP_TYPE			equ	15
-SYS_MAP_FIXED			equ	16
-SYS_MAP_ANONYMOUS		equ	32
+SYS_MAP_SHARED			equ	1	; Changes are visible to other processes, and are carried through to the underlying file.
+SYS_MAP_PRIVATE			equ	2	; Changes are not visible to other processes, and are not carried through to the underlying file.
+SYS_MAP_SHARED_VALIDATE	equ	3	; Same as SYS_MAP_SHARED, but checks for unknown flags.
+SYS_MAP_TYPE			equ	15	; Mask for type of mapping.
+SYS_MAP_FIXED			equ	16	; Place the mapping at exactly the provided address.
+SYS_MAP_ANONYMOUS		equ	32	; The mapping is not backed by any file. Its contents are initialized to zero.
 
 
 
