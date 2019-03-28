@@ -55,6 +55,19 @@ SYS_MAP_ANONYMOUS		equ	32
 
 
 
+;
+;	Description:
+;		Terminate the calling process with exit status.
+;
+;	Parameters:
+;		Program exit status.
+;
+;	Return:
+;		None.
+;
+;	Notes:
+;		This procedure does not return to the caller.
+;
 sysExit:
 	push	ebp				; Store base pointer
 	mov		ebp, esp		; Set base pointer to stack pointer
@@ -66,6 +79,22 @@ sysExit:
 
 
 
+;
+;	Description:
+;		Read from a file descriptor.
+;
+;	Parameters:
+;		File descriptor.
+;		Destination address.
+;		Amount of bytes to be read.
+;
+;	Return:
+;		On success, the number of bytes read is returned.
+;		On error, -1 is returned.
+;
+;	Notes:
+;		On success, the file position is advanced by the amount of bytes read.
+;
 sysRead:
 	push	ebp				; Store base pointer
 	mov		ebp, esp		; Set base pointer to stack pointer
@@ -87,6 +116,19 @@ sysRead:
 
 
 
+;
+;	Description:
+;		Write to a file descriptor.
+;
+;	Parameters:
+;		File descriptor.
+;		Source address.
+;		Amount of bytes to be written.
+;
+;	Return:
+;		On success, the number of bytes written is returned.
+;		On error, -1 is returned.
+;
 sysWrite:
 	push	ebp				; Store base pointer
 	mov		ebp, esp		; Set base pointer to stack pointer
@@ -108,6 +150,19 @@ sysWrite:
 
 
 
+;
+;	Description:
+;		Open and possibly create a file.
+;
+;	Parameters:
+;		File name.
+;		Flags.
+;		Mode.
+;
+;	Return:
+;		On success, the file descriptor is returned.
+;		On error, -1 is returned.
+;
 sysOpen:
 	push	ebp				; Store base pointer
 	mov		ebp, esp		; Set base pointer to stack pointer
@@ -129,6 +184,17 @@ sysOpen:
 
 
 
+;
+;	Description:
+;		Close a file descriptor.
+;
+;	Parameters:
+;		File descriptor.
+;
+;	Return:
+;		On success, 0 is returned.
+;		On error, -1 is returned.
+;
 sysClose:
 	push	ebp				; Store base pointer
 	mov		ebp, esp		; Set base pointer to stack pointer
@@ -148,6 +214,19 @@ sysClose:
 
 
 
+;
+;	Description:
+;		Reposition read/write file offset.
+;
+;	Parameters:
+;		File descriptor.
+;		Byte offset.
+;		Origin.
+;
+;	Return:
+;		On success, the resulting offset location as measured in bytes from the beginning of the file is returned.
+;		On error, -1 is returned.
+;
 sysLSeek:
 	push	ebp				; Store base pointer
 	mov		ebp, esp		; Set base pointer to stack pointer
@@ -169,6 +248,17 @@ sysLSeek:
 
 
 
+;
+;	Description:
+;		Map files or devices into memory.
+;
+;	Parameters:
+;		Memory map argument structure address.
+;
+;	Return:
+;		On success, a pointer to the memory map is returned.
+;		On error, -1 is returned.
+;
 sysMMap:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
