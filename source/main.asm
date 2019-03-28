@@ -1,3 +1,9 @@
+;	Description:
+;		Implementation of the BFASM brakfuck interpreter.
+
+
+
+
 %include "system.asm"
 %include "loader.asm"
 %include "interpreter.asm"

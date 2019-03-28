@@ -1,3 +1,9 @@
+;	Description:
+;		Some Linux system calls, and related defines.
+
+
+
+
 %ifndef SYSTEM_ASM
 %define SYSTEM_ASM
 

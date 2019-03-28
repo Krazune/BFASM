@@ -1,3 +1,9 @@
+;	Description:
+;		Interprets brainfuck instructions, and manages the tape.
+
+
+
+
 %ifndef INTERPRETER_ASM
 %define INTERPRETER_ASM
 

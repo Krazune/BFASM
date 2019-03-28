@@ -1,3 +1,9 @@
+;	Description:
+;		Reads brainfuck instructions from file, and stores it in the program's memory.
+
+
+
+
 %ifndef LOADER_ASM
 %define LOADER_ASM
 
