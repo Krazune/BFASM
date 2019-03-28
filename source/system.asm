@@ -69,9 +69,9 @@ SYS_MAP_ANONYMOUS		equ	32	; The mapping is not backed by any file. Its contents 
 ;		This procedure does not return to the caller.
 ;
 sysExit:
-	mov		eax, SYS_EXIT	; Set sys_exit system call number
-	mov		ebx, [esp + 4]	; Use parameter as exit status
-	int		0x80			; Kernel interrupt
+	mov		eax, SYS_EXIT	; Load the system call value.
+	mov		ebx, [esp + 4]	; Load the program's exit status.
+	int		0x80			; Invoke the system call.
 
 
 
@@ -93,22 +93,22 @@ sysExit:
 ;		On success, the file position is advanced by the amount of bytes read.
 ;
 sysRead:
-	push	ebp				; Store base pointer
-	mov		ebp, esp		; Set base pointer to stack pointer
+	push	ebp				; Store the caller's base pointer.
+	mov		ebp, esp		; Set the current procedure's base pointer.
 
-	push	ebx				; Store non-volatile register ebx
+	push	ebx				; Store the non-volatile register ebx.
 
-	mov		eax, SYS_READ	; Set sys_read system call number
-	mov		ebx, [ebp + 8]	; File descriptor to read from
-	mov		ecx, [ebp + 12]	; Destination buffer
-	mov		edx, [ebp + 16]	; Amount of bytes to be read
-	int		0x80			; Kernel interrupt
+	mov		eax, SYS_READ	; Load the system call value.
+	mov		ebx, [ebp + 8]	; Load the file descriptor to read from.
+	mov		ecx, [ebp + 12]	; Load the destination address.
+	mov		edx, [ebp + 16]	; Load the amount of bytes to be read.
+	int		0x80			; Invoke the system call.
 
-	pop		ebx				; Restore non-volatile register ebx
+	pop		ebx				; Restore the non-volatile register ebx.
 
-	mov		esp, ebp		; Clear stack
-	pop		ebp				; Restore base pointer
-	ret						; Return to caller
+	mov		esp, ebp		; Clear stack.
+	pop		ebp				; Restore caller's base pointer.
+	ret						; Return to caller.
 
 
 
@@ -127,22 +127,22 @@ sysRead:
 ;		On error, -1 is returned.
 ;
 sysWrite:
-	push	ebp				; Store base pointer
-	mov		ebp, esp		; Set base pointer to stack pointer
+	push	ebp				; Store the caller's base pointer.
+	mov		ebp, esp		; Set the current procedure's base pointer.
 
-	push	ebx				; Store non-volatile register ebx
+	push	ebx				; Store the non-volatile register ebx.
 
-	mov		eax, SYS_WRITE	; Set sys_write system call number
-	mov		ebx, [ebp + 8]	; File descriptor to write to
-	mov		ecx, [ebp + 12]	; Source buffer
-	mov		edx, [ebp + 16]	; Amount of bytes to be written
-	int		0x80			; Kernel interrupt
+	mov		eax, SYS_WRITE	; Load the system call value.
+	mov		ebx, [ebp + 8]	; Load the file descriptor to write to.
+	mov		ecx, [ebp + 12]	; Load the source address.
+	mov		edx, [ebp + 16]	; Load the amount of bytes to be written.
+	int		0x80			; Invoke the system call.
 
-	pop		ebx				; Restore non-volatile register ebx
+	pop		ebx				; Restore the non-volatile register ebx.
 
-	mov		esp, ebp		; Clear stack
-	pop		ebp				; Restore base pointer
-	ret						; Return to caller
+	mov		esp, ebp		; Clear stack.
+	pop		ebp				; Restore caller's base pointer.
+	ret						; Return to caller.
 
 
 
@@ -161,22 +161,22 @@ sysWrite:
 ;		On error, -1 is returned.
 ;
 sysOpen:
-	push	ebp				; Store base pointer
-	mov		ebp, esp		; Set base pointer to stack pointer
+	push	ebp				; Store the caller's base pointer.
+	mov		ebp, esp		; Set the current procedure's base pointer.
 
-	push	ebx				; Store non-volatile register ebx
+	push	ebx				; Store the non-volatile register ebx.
 
-	mov		eax, SYS_OPEN	; Set sys_open system call number
-	mov		ebx, [ebp + 8]	; File name
-	mov		ecx, [ebp + 12]	; Flags
-	mov		edx, [ebp + 16]	; Mode
-	int		0x80			; Kernel interrupt
+	mov		eax, SYS_OPEN	; Load the system call value.
+	mov		ebx, [ebp + 8]	; Load the file name.
+	mov		ecx, [ebp + 12]	; Load the flags.
+	mov		edx, [ebp + 16]	; Load the mode.
+	int		0x80			; Invoke the system call.
 
-	pop		ebx				; Restore non-volatile register ebx
+	pop		ebx				; Restore the non-volatile register ebx.
 
-	mov		esp, ebp		; Clear stack
-	pop		ebp				; Restore base pointer
-	ret						; Return to caller
+	mov		esp, ebp		; Clear stack.
+	pop		ebp				; Restore caller's base pointer.
+	ret						; Return to caller.
 
 
 
@@ -193,20 +193,20 @@ sysOpen:
 ;		On error, -1 is returned.
 ;
 sysClose:
-	push	ebp				; Store base pointer
-	mov		ebp, esp		; Set base pointer to stack pointer
+	push	ebp				; Store the caller's base pointer.
+	mov		ebp, esp		; Set the current procedure's base pointer.
 
-	push	ebx				; Store non-volatile register ebx
+	push	ebx				; Store the non-volatile register ebx.
 
-	mov		eax, SYS_CLOSE	; Set sys_close system call number
-	mov		ebx, [ebp + 8]	; File descriptor to be closed
-	int		0x80			; Kernel interrupt
+	mov		eax, SYS_CLOSE	; Load the system call value.
+	mov		ebx, [ebp + 8]	; Load the file descriptor to be closed.
+	int		0x80			; Invoke the system call.
 
-	pop		ebx				; Restore non-volatile register ebx
+	pop		ebx				; Restore the non-volatile register ebx.
 
-	mov		esp, ebp		; Clear stack
-	pop		ebp				; Restore base pointer
-	ret						; Return to caller
+	mov		esp, ebp		; Clear stack.
+	pop		ebp				; Restore caller's base pointer.
+	ret						; Return to caller.
 
 
 
@@ -225,22 +225,22 @@ sysClose:
 ;		On error, -1 is returned.
 ;
 sysLSeek:
-	push	ebp				; Store base pointer
-	mov		ebp, esp		; Set base pointer to stack pointer
+	push	ebp				; Store the caller's base pointer.
+	mov		ebp, esp		; Set the current procedure's base pointer.
 
-	push	ebx				; Store non-volatile register ebx
+	push	ebx				; Store the non-volatile register ebx.
 
-	mov		eax, SYS_LSEEK	; Set sys_lseek system call number
-	mov		ebx, [ebp + 8]	; File descriptor to seek
-	mov		ecx, [ebp + 12]	; Byte offset
-	mov		edx, [ebp + 16]	; Origin
-	int		0x80			; Kernel interrupt
+	mov		eax, SYS_LSEEK	; Load the system call value.
+	mov		ebx, [ebp + 8]	; Load the file descriptor to seek.
+	mov		ecx, [ebp + 12]	; Load the byte offset.
+	mov		edx, [ebp + 16]	; Load the origin.
+	int		0x80			; Invoke the system call.
 
-	pop		ebx				; Restore non-volatile register ebx
+	pop		ebx				; Restore the non-volatile register ebx.
 
-	mov		esp, ebp		; Clear stack
-	pop		ebp				; Restore base pointer
-	ret						; Return to caller
+	mov		esp, ebp		; Clear stack.
+	pop		ebp				; Restore caller's base pointer.
+	ret						; Return to caller.
 
 
 
@@ -257,20 +257,20 @@ sysLSeek:
 ;		On error, -1 is returned.
 ;
 sysMMap:
-	push	ebp						; Store base pointer
-	mov		ebp, esp				; Set base pointer to stack pointer
+	push	ebp				; Store the caller's base pointer.
+	mov		ebp, esp		; Set the current procedure's base pointer.
 
-	push	ebx						; Store non-volatile register ebx
+	push	ebx				; Store the non-volatile register ebx.
 
-	mov		eax, SYS_MMAP			; Set sys_mmap system call number
-	mov		ebx, [ebp + 8]			; Load argument struct address
-	int		0x80					; Kernel interrupt
+	mov		eax, SYS_MMAP	; Load the system call value.
+	mov		ebx, [ebp + 8]	; Load the argument structure address.
+	int		0x80			; Invoke the system call.
 
-	pop		ebx						; Restore non-volatile register ebx
+	pop		ebx				; Restore the non-volatile register ebx.
 
-	mov		esp, ebp				; Clear stack
-	pop		ebp						; Restore base pointer
-	ret								; Return to caller
+	mov		esp, ebp		; Clear stack.
+	pop		ebp				; Restore caller's base pointer.
+	ret						; Return to caller.
 
 
 
