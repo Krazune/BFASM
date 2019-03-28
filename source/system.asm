@@ -180,7 +180,7 @@ sysMMap:
 	push	ebx						; Store non-volatile register ebx
 
 	mov		eax, SYS_MMAP			; Set sys_mmap system call number
-	mov		ebx, dword [ebp + 8]	; Load argument struct address
+	mov		ebx, [ebp + 8]			; Load argument struct address
 	int		0x80					; Kernel interrupt
 
 	pop		ebx						; Restore non-volatile register ebx
