@@ -63,10 +63,6 @@ sysExit:
 	mov		ebx, [ebp + 8]	; Use parameter as exit status
 	int		0x80			; Kernel interrupt
 
-	mov		esp, ebp		; Unreachable code
-	pop		ebp				; Unreachable code
-	ret						; Unreachable code
-
 
 
 
