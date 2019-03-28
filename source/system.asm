@@ -69,11 +69,8 @@ SYS_MAP_ANONYMOUS		equ	32	; The mapping is not backed by any file. Its contents 
 ;		This procedure does not return to the caller.
 ;
 sysExit:
-	push	ebp				; Store base pointer
-	mov		ebp, esp		; Set base pointer to stack pointer
-
 	mov		eax, SYS_EXIT	; Set sys_exit system call number
-	mov		ebx, [ebp + 8]	; Use parameter as exit status
+	mov		ebx, [esp + 4]	; Use parameter as exit status
 	int		0x80			; Kernel interrupt
 
 
