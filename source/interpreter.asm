@@ -36,146 +36,146 @@ segment .bss
 
 segment .text
 interprete:
-	push	ebp											; Store base pointer
-	mov		ebp, esp									; Set base pointer to stack pointer
-	sub		esp, 32										; Reserve 32 bytes on the stack for local variables (current character, current instruction index, memory map argument structure)
+	push	ebp													; Store base pointer
+	mov		ebp, esp											; Set base pointer to stack pointer
+	sub		esp, 32												; Reserve 32 bytes on the stack for local variables (current character, current instruction index, memory map argument structure)
 
-	mov		dword [ebp - 8], 0							; Set current instruction index to 0
+	mov		dword [ebp - 8], 0									; Set current instruction index to 0
 
-	mov		eax, dword [ebp + 20]						; Load tape size argument in register eax
-	mov		dword [size], eax							; Store tape size in size global variable
+	mov		eax, dword [ebp + 20]								; Load tape size argument in register eax
+	mov		dword [size], eax									; Store tape size in size global variable
 
-	lea		eax, [ebp - 12]								; Store the file offset's local variable effective address in register eax
-	mov		dword [eax], 0								; Set file offeset to 0
+	lea		eax, [ebp - 12]										; Store the file offset's local variable effective address in register eax
+	mov		dword [eax], 0										; Set file offeset to 0
 
-	lea		eax, [ebp - 16]								; Store the file descriptor's local variable effective address in register eax
-	mov		dword [eax], -1								; Set file offeset to -1
+	lea		eax, [ebp - 16]										; Store the file descriptor's local variable effective address in register eax
+	mov		dword [eax], -1										; Set file offeset to -1
 
-	lea		eax, [ebp - 20]								; Store the map flags' local variable effective address in register eax
-	mov		dword [eax], MAP_PRIVATE | MAP_ANONYMOUS	; Set map flags to private, and anonymous
+	lea		eax, [ebp - 20]										; Store the map flags' local variable effective address in register eax
+	mov		dword [eax], SYS_MAP_PRIVATE | SYS_MAP_ANONYMOUS	; Set map flags to private, and anonymous
 
-	lea		eax, [ebp - 24]								; Store the map protection's local variable effective address in register eax
-	mov		dword [eax], PROT_READ | PROT_WRITE			; Set map protection to read, and write
+	lea		eax, [ebp - 24]										; Store the map protection's local variable effective address in register eax
+	mov		dword [eax], SYS_PROT_READ | SYS_PROT_WRITE			; Set map protection to read, and write
 
-	lea		eax, [ebp - 28]								; Store the map size's local variable effective address in register eax
-	mov		ecx, dword [size]							; Store tape size in register ecx
+	lea		eax, [ebp - 28]										; Store the map size's local variable effective address in register eax
+	mov		ecx, dword [size]									; Store tape size in register ecx
 	mov		dword [eax], ecx
 
-	lea		eax, [ebp - 32]								; Store the map adress's local variable effective address in register eax
-	mov		dword [eax], 0								; Set map address to 0
+	lea		eax, [ebp - 32]										; Store the map adress's local variable effective address in register eax
+	mov		dword [eax], 0										; Set map address to 0
 
-	lea		eax, [ebp - 32]								; Store the memory map argument structure's local variable effective address in register eax
+	lea		eax, [ebp - 32]										; Store the memory map argument structure's local variable effective address in register eax
 
-	push	eax											; Push memory map argument structure's address
-	call	sysMMap										; Map memory
-	add		esp, 4										; Clear stack arguments
+	push	eax													; Push memory map argument structure's address
+	call	sysMMap												; Map memory
+	add		esp, 4												; Clear stack arguments
 
-	cmp		eax, -1										; Check if memory was mapped successfully
-	je		interprete.memoryError						; Exit the procedure if the memory was not mapped successfully
+	cmp		eax, -1												; Check if memory was mapped successfully
+	je		interprete.memoryError								; Exit the procedure if the memory was not mapped successfully
 
-	mov		dword [tapeAddress], eax					; Store the memory map address in local variable
+	mov		dword [tapeAddress], eax							; Store the memory map address in local variable
 
 .readingLoop:
-	mov		eax, dword [ebp - 8]						; Store current instruction index in register eax
-	cmp		eax, dword [ebp + 16]						; Check if current instruction index is greater or equal to instruction size
-	jge		interprete.success							; Exit procedure successfully if no more instructions
+	mov		eax, dword [ebp - 8]								; Store current instruction index in register eax
+	cmp		eax, dword [ebp + 16]								; Check if current instruction index is greater or equal to instruction size
+	jge		interprete.success									; Exit procedure successfully if no more instructions
 
-	mov		eax, [ebp + 12]								; Store instructions address in register eax
-	mov		ecx, dword [ebp - 8]						; Store current instruction index in register ecx
-	add		eax, ecx									; Add current instruction index to instructions address
-	mov		al, byte [eax]								; Store character in register al
-	mov		byte [ebp - 4], al							; Store al in current character
+	mov		eax, [ebp + 12]										; Store instructions address in register eax
+	mov		ecx, dword [ebp - 8]								; Store current instruction index in register ecx
+	add		eax, ecx											; Add current instruction index to instructions address
+	mov		al, byte [eax]										; Store character in register al
+	mov		byte [ebp - 4], al									; Store al in current character
 
-	inc		dword [ebp - 8]								; Increment current instruction index
+	inc		dword [ebp - 8]										; Increment current instruction index
 
-	cmp		byte [ebp - 4], '>'							; Check if the character read is '>'
-	je		interprete.greaterThan						; Process the '>' symbol
+	cmp		byte [ebp - 4], '>'									; Check if the character read is '>'
+	je		interprete.greaterThan								; Process the '>' symbol
 
-	cmp		byte [ebp - 4], '<'							; Check if the character read is '<'
-	je		interprete.lessThan							; Process the '<' symbol
+	cmp		byte [ebp - 4], '<'									; Check if the character read is '<'
+	je		interprete.lessThan									; Process the '<' symbol
 
-	cmp		byte [ebp - 4], '+'							; Check if the character read is '+'
-	je		interprete.plus								; Process the '+' symbol
+	cmp		byte [ebp - 4], '+'									; Check if the character read is '+'
+	je		interprete.plus										; Process the '+' symbol
 
-	cmp		byte [ebp - 4], '-'							; Check if the character read is '-'
-	je		interprete.minus							; Process the '-' symbol
+	cmp		byte [ebp - 4], '-'									; Check if the character read is '-'
+	je		interprete.minus									; Process the '-' symbol
 
-	cmp		byte [ebp - 4], '.'							; Check if the character read is '.'
-	je		interprete.dot								; Process the '.' symbol
+	cmp		byte [ebp - 4], '.'									; Check if the character read is '.'
+	je		interprete.dot										; Process the '.' symbol
 
-	cmp		byte [ebp - 4], ','							; Check if the character read is ','
-	je		interprete.comma							; Process the ',' symbol
+	cmp		byte [ebp - 4], ','									; Check if the character read is ','
+	je		interprete.comma									; Process the ',' symbol
 
-	cmp		byte [ebp - 4], '['							; Check if the character read is '['
-	je		interprete.leftBracket						; Process the '[' symbol
+	cmp		byte [ebp - 4], '['									; Check if the character read is '['
+	je		interprete.leftBracket								; Process the '[' symbol
 
-	cmp		byte [ebp - 4], ']'							; Check if the character read is ']'
-	je		interprete.rightBracket						; Process the ']' symbol
+	cmp		byte [ebp - 4], ']'									; Check if the character read is ']'
+	je		interprete.rightBracket								; Process the ']' symbol
 
-	jmp		interprete.readingLoop						; Ignore the character read if it's not a valid symbol
+	jmp		interprete.readingLoop								; Ignore the character read if it's not a valid symbol
 
 .greaterThan:
-	call	incrementCellIndex							; Increment the cell index
-	jmp		interprete.readingLoop						; Keep reading the file
+	call	incrementCellIndex									; Increment the cell index
+	jmp		interprete.readingLoop								; Keep reading the file
 
 .lessThan:
-	call	decrementCellIndex							; Decrement the cell index
-	jmp		interprete.readingLoop						; Keep reading the file
+	call	decrementCellIndex									; Decrement the cell index
+	jmp		interprete.readingLoop								; Keep reading the file
 
 .plus:
-	call	incrementCellValue							; Increment the cell value
-	jmp		interprete.readingLoop						; Keep reading the file
+	call	incrementCellValue									; Increment the cell value
+	jmp		interprete.readingLoop								; Keep reading the file
 
 .minus:
-	call	decrementCellValue							; Decrement the cell value
-	jmp		interprete.readingLoop						; Keep reading the file
+	call	decrementCellValue									; Decrement the cell value
+	jmp		interprete.readingLoop								; Keep reading the file
 
 .dot:
-	call	printValue									; Print the cell value
-	jmp		interprete.readingLoop						; Keep reading the file
+	call	printValue											; Print the cell value
+	jmp		interprete.readingLoop								; Keep reading the file
 
 .comma:
-	call	getValue									; Store a single byte of input into the cell value at index
-	jmp		interprete.readingLoop						; Keep reading the file
+	call	getValue											; Store a single byte of input into the cell value at index
+	jmp		interprete.readingLoop								; Keep reading the file
 
 .leftBracket:
-	lea		eax, [ebp - 8]								; Store the current instruction index's local variable effective address in register eax
-	push	eax											; Push current instruction index address
-	push	dword [ebp + 16]							; Push instruction size
-	push	dword [ebp + 12]							; Push instructions' address
-	call	jumpForwards								; Jump forward to the instruction after the matching ']' symbol if the current cell value is 0
-	add		esp, 12										; Clear stack arguments
+	lea		eax, [ebp - 8]										; Store the current instruction index's local variable effective address in register eax
+	push	eax													; Push current instruction index address
+	push	dword [ebp + 16]									; Push instruction size
+	push	dword [ebp + 12]									; Push instructions' address
+	call	jumpForwards										; Jump forward to the instruction after the matching ']' symbol if the current cell value is 0
+	add		esp, 12												; Clear stack arguments
 
-	cmp		eax, NO_ERROR								; Check if any error occurred when jumping forward (missing matching bracket)
-	je		interprete.readingLoop						; Keep reading the file if no error was found
+	cmp		eax, NO_ERROR										; Check if any error occurred when jumping forward (missing matching bracket)
+	je		interprete.readingLoop								; Keep reading the file if no error was found
 
-	jmp		interprete.exit								; Exit the procedure with a failure return value
+	jmp		interprete.exit										; Exit the procedure with a failure return value
 
 .rightBracket:
-	lea		eax, [ebp - 8]								; Store the current instruction index's local variable effective address in register eax
-	push	eax											; Push current instruction index address
-	push	dword [ebp + 16]							; Push instruction size
-	push	dword [ebp + 12]							; Push instructions' address
-	call	jumpBackwards								; Jump backwards to the instruction after the matching '[' symbol if the current cell value is not 0
-	add		esp, 12										; Clear stack arguments
+	lea		eax, [ebp - 8]										; Store the current instruction index's local variable effective address in register eax
+	push	eax													; Push current instruction index address
+	push	dword [ebp + 16]									; Push instruction size
+	push	dword [ebp + 12]									; Push instructions' address
+	call	jumpBackwards										; Jump backwards to the instruction after the matching '[' symbol if the current cell value is not 0
+	add		esp, 12												; Clear stack arguments
 
-	cmp		eax, NO_ERROR								; Check if any error occurred when jumping backwards (missing matching bracket)
-	je		interprete.readingLoop						; Keep reading the file if no error was found
+	cmp		eax, NO_ERROR										; Check if any error occurred when jumping backwards (missing matching bracket)
+	je		interprete.readingLoop								; Keep reading the file if no error was found
 
-	jmp		interprete.exit								; Exit the procedure with a failure return value
+	jmp		interprete.exit										; Exit the procedure with a failure return value
 
 .memoryError:
-	mov		eax, TAPE_MEMORY_ERROR						; Set the failure return value
-	jmp		interprete.exit								; Exit the procedure
+	mov		eax, TAPE_MEMORY_ERROR								; Set the failure return value
+	jmp		interprete.exit										; Exit the procedure
 
 .success:
-	mov		eax, NO_ERROR								; Set the success return value
-	jmp		interprete.exit								; Exit the procedure
+	mov		eax, NO_ERROR										; Set the success return value
+	jmp		interprete.exit										; Exit the procedure
 
 .exit:
-	mov		esp, ebp									; Clear stack
-	pop		ebp											; Restore base pointer
-	ret													; Return to caller
+	mov		esp, ebp											; Clear stack
+	pop		ebp													; Restore base pointer
+	ret															; Return to caller
 
 
 
@@ -264,7 +264,7 @@ printValue:
 
 	push	1
 	push	eax
-	push	STDOUT
+	push	SYS_STDOUT
 	call	sysWrite					; Print cell value at index
 	add		esp, 12						; Clear stack arguments
 
@@ -284,7 +284,7 @@ getValue:
 
 	push	1
 	push	eax
-	push	STDIN
+	push	SYS_STDIN
 	call	sysRead						; Store input into the cell at index
 	add		esp, 12						; Clear stack arguments
 

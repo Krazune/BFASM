@@ -11,46 +11,46 @@
 
 
 ; System calls
-SYS_EXIT			equ	1
-SYS_READ			equ	3
-SYS_WRITE			equ	4
-SYS_OPEN			equ	5
-SYS_CLOSE			equ	6
-SYS_LSEEK			equ	19
-SYS_MMAP			equ	90
+SYS_EXIT				equ	1
+SYS_READ				equ	3
+SYS_WRITE				equ	4
+SYS_OPEN				equ	5
+SYS_CLOSE				equ	6
+SYS_LSEEK				equ	19
+SYS_MMAP				equ	90
 
 ; Status codes
-EXIT_SUCCESS		equ	0
-EXIT_FAILURE		equ	1
+SYS_EXIT_SUCCESS		equ	0
+SYS_EXIT_FAILURE		equ	1
 
 ; Standard file descriptors
-STDIN				equ	0
-STDOUT				equ	1
-STDERR				equ	2
+SYS_STDIN				equ	0
+SYS_STDOUT				equ	1
+SYS_STDERR				equ	2
 
 ; File flags
-RDONLY				equ	0
-WRONLY				equ	1
-RDWR				equ	2
+SYS_RDONLY				equ	0
+SYS_WRONLY				equ	1
+SYS_RDWR				equ	2
 
 ; File origin
-SEEK_SET			equ	0
-SEEK_CUR			equ	1
-SEEK_END			equ	2
+SYS_SEEK_SET			equ	0
+SYS_SEEK_CUR			equ	1
+SYS_SEEK_END			equ	2
 
 ; Map protection
-PROT_NONE			equ	0
-PROT_READ			equ	1
-PROT_WRITE			equ	2
-PROT_EXEC			equ	4
+SYS_PROT_NONE			equ	0
+SYS_PROT_READ			equ	1
+SYS_PROT_WRITE			equ	2
+SYS_PROT_EXEC			equ	4
 
 ; Map flags
-MAP_SHARED			equ	1
-MAP_PRIVATE			equ	2
-MAP_SHARED_VALIDATE	equ	3
-MAP_TYPE			equ	15
-MAP_FIXED			equ	16
-MAP_ANONYMOUS		equ	32
+SYS_MAP_SHARED			equ	1
+SYS_MAP_PRIVATE			equ	2
+SYS_MAP_SHARED_VALIDATE	equ	3
+SYS_MAP_TYPE			equ	15
+SYS_MAP_FIXED			equ	16
+SYS_MAP_ANONYMOUS		equ	32
 
 
 

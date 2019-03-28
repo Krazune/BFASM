@@ -147,11 +147,11 @@ _start:
 	jmp		_start.failureExit			; Exit program with failure exit status
 
 .successExit:
-	push	EXIT_SUCCESS				; Set success exit status
+	push	SYS_EXIT_SUCCESS			; Set success exit status
 	call	sysExit						; Exit program
 
 .failureExit:
-	push	EXIT_FAILURE				; Set failure exit status
+	push	SYS_EXIT_FAILURE			; Set failure exit status
 	call	sysExit						; Exit program
 
 
@@ -163,7 +163,7 @@ printInformation:
 
 	push	helpMessageLength
 	push	helpMessage
-	push	STDOUT
+	push	SYS_STDOUT
 	call	sysWrite			; Print program information
 	add		esp, 12				; Clear stack arguments
 
@@ -180,7 +180,7 @@ printArgumentCountError:
 
 	push	invalidArgumentCountMessageLength
 	push	invalidArgumentCountMessage
-	push	STDERR
+	push	SYS_STDERR
 	call	sysWrite							; Print argument count error message
 	add		esp, 12								; Clear stack arguments
 
@@ -197,7 +197,7 @@ printInvalidPathError:
 
 	push	invalidPathErrorLength
 	push	invalidPathError
-	push	STDERR
+	push	SYS_STDERR
 	call	sysWrite				; Print invalid path error
 	add		esp, 12					; Clear stack arguments
 
@@ -214,7 +214,7 @@ printMemoryError:
 
 	push	memoryErrorLength
 	push	memoryError
-	push	STDERR
+	push	SYS_STDERR
 	call	sysWrite			; Print memory error
 	add		esp, 12				; Clear stack arguments
 
@@ -231,7 +231,7 @@ printLeftBracketError:
 
 	push	leftBracketErrorLength
 	push	leftBracketError
-	push	STDERR
+	push	SYS_STDERR
 	call	sysWrite				; Print missing left bracket error
 	add		esp, 12					; Clear stack arguments
 
@@ -248,7 +248,7 @@ printRightBracketError:
 
 	push	rightBracketErrorLength
 	push	rightBracketError
-	push	STDERR
+	push	SYS_STDERR
 	call	sysWrite				; Print missing left bracket error
 	add		esp, 12					; Clear stack arguments
 
@@ -265,7 +265,7 @@ printInvalidTapeSizeError:
 
 	push	invalidTapeSizeErrorLength
 	push	invalidTapeSizeError
-	push	STDERR
+	push	SYS_STDERR
 	call	sysWrite					; Print missing left bracket error
 	add		esp, 12						; Clear stack arguments
 
