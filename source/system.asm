@@ -55,6 +55,12 @@ SYS_MAP_ANONYMOUS		equ	32	; The mapping is not backed by any file. Its contents 
 
 
 
+segment .data
+	sys_errno	dd	0	; Error number returned from the system calls.
+
+
+
+
 segment .text
 ;
 ;	Description:
@@ -92,24 +98,35 @@ sysExit:
 ;
 ;	Notes:
 ;		On success, the file position is advanced by the amount of bytes read.
+;		On error, sets sys_errno with the error number.
 ;
 sysRead:
-	push	ebp				; Store the caller's base pointer.
-	mov		ebp, esp		; Set the current procedure's base pointer.
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
 
-	push	ebx				; Store the non-volatile register ebx.
+	push	ebx					; Store the non-volatile register ebx.
 
-	mov		eax, SYS_READ	; Load the system call value.
-	mov		ebx, [ebp + 8]	; Load the file descriptor to read from.
-	mov		ecx, [ebp + 12]	; Load the destination address.
-	mov		edx, [ebp + 16]	; Load the amount of bytes to be read.
-	int		0x80			; Invoke the system call.
+	mov		eax, SYS_READ		; Load the system call value.
+	mov		ebx, [ebp + 8]		; Load the file descriptor to read from.
+	mov		ecx, [ebp + 12]		; Load the destination address.
+	mov		edx, [ebp + 16]		; Load the amount of bytes to be read.
+	int		0x80				; Invoke the system call.
 
-	pop		ebx				; Restore the non-volatile register ebx.
+	cmp		eax, 0				; Compare the system call's return value with 0.
+	jge		sysRead.exit		; Exit the procedure if the return value is not negative (successful return value).
 
-	mov		esp, ebp		; Clear stack.
-	pop		ebp				; Restore caller's base pointer.
-	ret						; Return to caller.
+	cmp		eax, -4095			; Compare the system call's return value with the lowest error value.
+	jl		sysRead.exit		; Exit the procedure if the return value is lower than -4095 (successful return value).
+
+	mov		[sys_errno], eax	; Set sys_errno to the system call's error number.
+	mov		eax, -1				; Set the procedure's return value to -1.
+
+.exit:
+	pop		ebx					; Restore the non-volatile register ebx.
+
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
 
 
 
@@ -127,23 +144,36 @@ sysRead:
 ;		On success, the number of bytes written is returned.
 ;		On error, -1 is returned.
 ;
+;	Notes:
+;		On error, sets sys_errno with the error number.
+;
 sysWrite:
-	push	ebp				; Store the caller's base pointer.
-	mov		ebp, esp		; Set the current procedure's base pointer.
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
 
-	push	ebx				; Store the non-volatile register ebx.
+	push	ebx					; Store the non-volatile register ebx.
 
-	mov		eax, SYS_WRITE	; Load the system call value.
-	mov		ebx, [ebp + 8]	; Load the file descriptor to write to.
-	mov		ecx, [ebp + 12]	; Load the source address.
-	mov		edx, [ebp + 16]	; Load the amount of bytes to be written.
-	int		0x80			; Invoke the system call.
+	mov		eax, SYS_WRITE		; Load the system call value.
+	mov		ebx, [ebp + 8]		; Load the file descriptor to write to.
+	mov		ecx, [ebp + 12]		; Load the source address.
+	mov		edx, [ebp + 16]		; Load the amount of bytes to be written.
+	int		0x80				; Invoke the system call.
 
-	pop		ebx				; Restore the non-volatile register ebx.
+	cmp		eax, 0				; Compare the system call's return value with 0.
+	jge		sysWrite.exit		; Exit the procedure if the return value is not negative (successful return value).
 
-	mov		esp, ebp		; Clear stack.
-	pop		ebp				; Restore caller's base pointer.
-	ret						; Return to caller.
+	cmp		eax, -4095			; Compare the system call's return value with the lowest error value.
+	jl		sysWrite.exit		; Exit the procedure if the return value is lower than -4095 (successful return value).
+
+	mov		[sys_errno], eax	; Set sys_errno to the system call's error number.
+	mov		eax, -1				; Set the procedure's return value to -1.
+
+.exit:
+	pop		ebx					; Restore the non-volatile register ebx.
+
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
 
 
 
@@ -161,23 +191,36 @@ sysWrite:
 ;		On success, the file descriptor is returned.
 ;		On error, -1 is returned.
 ;
+;	Notes:
+;		On error, sets sys_errno with the error number.
+;
 sysOpen:
-	push	ebp				; Store the caller's base pointer.
-	mov		ebp, esp		; Set the current procedure's base pointer.
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
 
-	push	ebx				; Store the non-volatile register ebx.
+	push	ebx					; Store the non-volatile register ebx.
 
-	mov		eax, SYS_OPEN	; Load the system call value.
-	mov		ebx, [ebp + 8]	; Load the file name.
-	mov		ecx, [ebp + 12]	; Load the flags.
-	mov		edx, [ebp + 16]	; Load the mode.
-	int		0x80			; Invoke the system call.
+	mov		eax, SYS_OPEN		; Load the system call value.
+	mov		ebx, [ebp + 8]		; Load the file name.
+	mov		ecx, [ebp + 12]		; Load the flags.
+	mov		edx, [ebp + 16]		; Load the mode.
+	int		0x80				; Invoke the system call.
 
-	pop		ebx				; Restore the non-volatile register ebx.
+	cmp		eax, 0				; Compare the system call's return value with 0.
+	jge		sysOpen.exit		; Exit the procedure if the return value is not negative (successful return value).
 
-	mov		esp, ebp		; Clear stack.
-	pop		ebp				; Restore caller's base pointer.
-	ret						; Return to caller.
+	cmp		eax, -4095			; Compare the system call's return value with the lowest error value.
+	jl		sysOpen.exit		; Exit the procedure if the return value is lower than -4095 (successful return value).
+
+	mov		[sys_errno], eax	; Set sys_errno to the system call's error number.
+	mov		eax, -1				; Set the procedure's return value to -1.
+
+.exit:
+	pop		ebx					; Restore the non-volatile register ebx.
+
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
 
 
 
@@ -193,21 +236,34 @@ sysOpen:
 ;		On success, 0 is returned.
 ;		On error, -1 is returned.
 ;
+;	Notes:
+;		On error, sets sys_errno with the error number.
+;
 sysClose:
-	push	ebp				; Store the caller's base pointer.
-	mov		ebp, esp		; Set the current procedure's base pointer.
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
 
-	push	ebx				; Store the non-volatile register ebx.
+	push	ebx					; Store the non-volatile register ebx.
 
-	mov		eax, SYS_CLOSE	; Load the system call value.
-	mov		ebx, [ebp + 8]	; Load the file descriptor to be closed.
-	int		0x80			; Invoke the system call.
+	mov		eax, SYS_CLOSE		; Load the system call value.
+	mov		ebx, [ebp + 8]		; Load the file descriptor to be closed.
+	int		0x80				; Invoke the system call.
 
-	pop		ebx				; Restore the non-volatile register ebx.
+	cmp		eax, 0				; Compare the system call's return value with 0.
+	jge		sysClose.exit		; Exit the procedure if the return value is not negative (successful return value).
 
-	mov		esp, ebp		; Clear stack.
-	pop		ebp				; Restore caller's base pointer.
-	ret						; Return to caller.
+	cmp		eax, -4095			; Compare the system call's return value with the lowest error value.
+	jl		sysClose.exit		; Exit the procedure if the return value is lower than -4095 (successful return value).
+
+	mov		[sys_errno], eax	; Set sys_errno to the system call's error number.
+	mov		eax, -1				; Set the procedure's return value to -1.
+
+.exit:
+	pop		ebx					; Restore the non-volatile register ebx.
+
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
 
 
 
@@ -225,23 +281,36 @@ sysClose:
 ;		On success, the resulting offset location as measured in bytes from the beginning of the file is returned.
 ;		On error, -1 is returned.
 ;
+;	Notes:
+;		On error, sets sys_errno with the error number.
+;
 sysLSeek:
-	push	ebp				; Store the caller's base pointer.
-	mov		ebp, esp		; Set the current procedure's base pointer.
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
 
-	push	ebx				; Store the non-volatile register ebx.
+	push	ebx					; Store the non-volatile register ebx.
 
-	mov		eax, SYS_LSEEK	; Load the system call value.
-	mov		ebx, [ebp + 8]	; Load the file descriptor to seek.
-	mov		ecx, [ebp + 12]	; Load the byte offset.
-	mov		edx, [ebp + 16]	; Load the origin.
-	int		0x80			; Invoke the system call.
+	mov		eax, SYS_LSEEK		; Load the system call value.
+	mov		ebx, [ebp + 8]		; Load the file descriptor to seek.
+	mov		ecx, [ebp + 12]		; Load the byte offset.
+	mov		edx, [ebp + 16]		; Load the origin.
+	int		0x80				; Invoke the system call.
 
-	pop		ebx				; Restore the non-volatile register ebx.
+	cmp		eax, 0				; Compare the system call's return value with 0.
+	jge		sysLSeek.exit		; Exit the procedure if the return value is not negative (successful return value).
 
-	mov		esp, ebp		; Clear stack.
-	pop		ebp				; Restore caller's base pointer.
-	ret						; Return to caller.
+	cmp		eax, -4095			; Compare the system call's return value with the lowest error value.
+	jl		sysLSeek.exit		; Exit the procedure if the return value is lower than -4095 (successful return value).
+
+	mov		[sys_errno], eax	; Set sys_errno to the system call's error number.
+	mov		eax, -1				; Set the procedure's return value to -1.
+
+.exit:
+	pop		ebx					; Restore the non-volatile register ebx.
+
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
 
 
 
@@ -257,21 +326,34 @@ sysLSeek:
 ;		On success, a pointer to the memory map is returned.
 ;		On error, -1 is returned.
 ;
+;	Notes:
+;		On error, sets sys_errno with the error number.
+;
 sysMMap:
-	push	ebp				; Store the caller's base pointer.
-	mov		ebp, esp		; Set the current procedure's base pointer.
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
 
-	push	ebx				; Store the non-volatile register ebx.
+	push	ebx					; Store the non-volatile register ebx.
 
-	mov		eax, SYS_MMAP	; Load the system call value.
-	mov		ebx, [ebp + 8]	; Load the argument structure address.
-	int		0x80			; Invoke the system call.
+	mov		eax, SYS_MMAP		; Load the system call value.
+	mov		ebx, [ebp + 8]		; Load the argument structure address.
+	int		0x80				; Invoke the system call.
 
-	pop		ebx				; Restore the non-volatile register ebx.
+	cmp		eax, 0				; Compare the system call's return value with 0.
+	jge		sysMMap.exit		; Exit the procedure if the return value is not negative (successful return value).
 
-	mov		esp, ebp		; Clear stack.
-	pop		ebp				; Restore caller's base pointer.
-	ret						; Return to caller.
+	cmp		eax, -4095			; Compare the system call's return value with the lowest error value.
+	jl		sysMMap.exit		; Exit the procedure if the return value is lower than -4095 (successful return value).
+
+	mov		[sys_errno], eax	; Set sys_errno to the system call's error number.
+	mov		eax, -1				; Set the procedure's return value to -1.
+
+.exit:
+	pop		ebx					; Restore the non-volatile register ebx.
+
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
 
 
 

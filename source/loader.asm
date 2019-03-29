@@ -37,8 +37,8 @@ load:
 	call	sysOpen												; Open file
 	add		esp, 12												; Clear stack arguments
 
-	cmp		eax, 0												; Check if the file was open successfully
-	jl		load.invalidPath									; Exit the procedure if the file was not open successfully
+	cmp		eax, -1												; Check if the file was open successfully
+	je		load.invalidPath									; Exit the procedure if the file was not open successfully
 
 	mov		dword [ebp - 4], eax								; Store file descriptor
 
