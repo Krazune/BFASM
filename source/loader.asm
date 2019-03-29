@@ -15,12 +15,12 @@
 
 
 
-LOAD_SUCCESS			equ	0
-LOAD_INVALID_PATH		equ	-1
-ZERO_INSTRUCTIONS		equ	-2
-MEMORY_ERROR			equ	-3
-MISSING_LEFT_BRACKET	equ	-4
-MISSING_RIGHT_BRACKET	equ	-5
+LOAD_SUCCESS			equ	0	; Instructions loaded successfully.
+LOAD_INVALID_PATH		equ	-1	; Invalid path given.
+ZERO_INSTRUCTIONS		equ	-2	; No instructions in the input file.
+MEMORY_ERROR			equ	-3	; Dynamic memory error.
+MISSING_LEFT_BRACKET	equ	-4	; Missing left bracket.
+MISSING_RIGHT_BRACKET	equ	-5	; Missing right bracket.
 
 
 
