@@ -279,6 +279,7 @@ loadInstructions:
 
 .readingLoop:
 	lea		eax, [ebp - 8]							; Store the current character's local variable effective address in register eax
+
 	push	1
 	push	eax
 	push	dword [ebp + 8]							; Push the file descriptor
