@@ -55,6 +55,7 @@ SYS_MAP_ANONYMOUS		equ	32	; The mapping is not backed by any file. Its contents 
 
 
 
+segment .text
 ;
 ;	Description:
 ;		Terminate the calling process with exit status.
