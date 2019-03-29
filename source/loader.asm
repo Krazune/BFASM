@@ -26,6 +26,37 @@ MISSING_RIGHT_BRACKET	equ	-5	; Missing right bracket.
 
 
 segment .text
+;
+;	Description:
+;		Load instructions from file, into the program's memory.
+;
+;	Parameters:
+;		File name.
+;		Instructions' destination address.
+;		Instruction count's address.
+;
+;	Local variables:
+;		File descriptor.
+;		Instruction count's address.
+;		Instructions' memory map address.
+;		File offset (part of the memory map argument structure).
+;		File descriptor (part of the memory map argument structure).
+;		Map flags (part of the memory map argument structure).
+;		Map protection (part of the memory map argument structure).
+;		Map size (part of the memory map argument structure).
+;		Map address (part of the memory map argument structure).
+;
+;	Return:
+;		On success, LOAD_SUCCESS is returned.
+;		On invalid path, LOAD_INVALID_PATH is returned.
+;		On zero instructions in input file, ZERO_INSTRUCTIONS is returned.
+;		On dynamic memory error, MEMORY_ERROR is returned.
+;		On missing left bracket, MISSING_LEFT_BRACKET is returned.
+;		On missing right bracket, MISSING_RIGHT_BRACKET is returned.
+;
+;	Notes:
+;		The instructions' memory map address, and the instruction count are passed to the caller using the parameters.
+;
 load:
 	push	ebp														; Store base pointer
 	mov		ebp, esp												; Set base pointer to stack pointer
@@ -143,6 +174,23 @@ load:
 
 
 
+;
+;	Description:
+;		Count the instructions in the file.
+;
+;	Parameters:
+;		File descriptor.
+;
+;	Local variables:
+;		Instruction count.
+;		Last character read from file.
+;
+;	Return:
+;		The instruction count is returned.
+;
+;	Notes:
+;		Assumes that the file descriptor is valid.
+;
 instructionCount:
 	push	ebp								; Store base pointer
 	mov		ebp, esp						; Set base pointer to stack pointer
@@ -202,6 +250,26 @@ instructionCount:
 
 
 
+;
+;	Description:
+;		Read instructions from file, validate them, and load them into the program's memory.
+;
+;	Parameters:
+;		File descriptor.
+;		Instructions' destination address.
+;
+;	Local variables:
+;		Bracket nesting level.
+;		Last character read from file.
+;
+;	Return:
+;		On success, LOAD_SUCCESS is returned.
+;		On missing left bracket, MISSING_LEFT_BRACKET is returned.
+;		On missing right bracket, MISSING_RIGHT_BRACKET is returned.
+;
+;	Notes:
+;		Assumes that the file descriptor is valid, the destination memory is already mapped, and there is enough space to load all instructions.
+;
 loadInstructions:
 	push	ebp										; Store base pointer
 	mov		ebp, esp								; Set base pointer to stack pointer
