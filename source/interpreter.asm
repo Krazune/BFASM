@@ -21,29 +21,17 @@ TAPE_MEMORY_ERROR	equ -1
 
 
 
-segment .data
-	cellIndex	dd	0
-
-
-
-
-segment .bss
-	tapeAddress	resd	1
-	size		resd	1
-
-
-
-
 segment .text
 interprete:
 	push	ebp													; Store base pointer
 	mov		ebp, esp											; Set base pointer to stack pointer
-	sub		esp, 32												; Reserve 32 bytes on the stack for local variables (current character, current instruction index, memory map argument structure)
+	sub		esp, 44												; Reserve 44 bytes on the stack for local variables (current character, current instruction index, memory map argument structure, tape size, tape address, cell index)
 
 	mov		dword [ebp - 8], 0									; Set current instruction index to 0
+	mov		dword [ebp - 44], 0
 
 	mov		eax, dword [ebp + 20]								; Load tape size argument in register eax
-	mov		dword [size], eax									; Store tape size in size global variable
+	mov		dword [ebp - 36], eax								; Store tape size in the tape size variable
 
 	lea		eax, [ebp - 12]										; Store the file offset's local variable effective address in register eax
 	mov		dword [eax], 0										; Set file offeset to 0
@@ -58,7 +46,7 @@ interprete:
 	mov		dword [eax], SYS_PROT_READ | SYS_PROT_WRITE			; Set map protection to read, and write
 
 	lea		eax, [ebp - 28]										; Store the map size's local variable effective address in register eax
-	mov		ecx, dword [size]									; Store tape size in register ecx
+	mov		ecx, dword [ebp - 36]								; Store tape size in register ecx
 	mov		dword [eax], ecx
 
 	lea		eax, [ebp - 32]										; Store the map adress's local variable effective address in register eax
@@ -73,7 +61,7 @@ interprete:
 	cmp		eax, -1												; Check if memory was mapped successfully
 	je		interprete.memoryError								; Exit the procedure if the memory was not mapped successfully
 
-	mov		dword [tapeAddress], eax							; Store the memory map address in local variable
+	mov		dword [ebp - 40], eax
 
 .readingLoop:
 	mov		eax, dword [ebp - 8]								; Store current instruction index in register eax
@@ -115,36 +103,58 @@ interprete:
 	jmp		interprete.readingLoop								; Ignore the character read if it's not a valid symbol
 
 .greaterThan:
+	lea		eax, [ebp - 44]
+	push	eax
+	push	dword [ebp - 36]
 	call	incrementCellIndex									; Increment the cell index
+	add		esp, 8
 	jmp		interprete.readingLoop								; Keep reading the file
 
 .lessThan:
+	lea		eax, [ebp - 44]
+	push	eax
+	push	dword [ebp - 36]
 	call	decrementCellIndex									; Decrement the cell index
+	add		esp, 8
 	jmp		interprete.readingLoop								; Keep reading the file
 
 .plus:
+	push	dword [ebp - 44]
+	push	dword [ebp - 40]
 	call	incrementCellValue									; Increment the cell value
+	add		esp, 8
 	jmp		interprete.readingLoop								; Keep reading the file
 
 .minus:
+	push	dword [ebp - 44]
+	push	dword [ebp - 40]
 	call	decrementCellValue									; Decrement the cell value
+	add		esp, 8
 	jmp		interprete.readingLoop								; Keep reading the file
 
 .dot:
+	push	dword [ebp - 44]
+	push	dword [ebp - 40]
 	call	printValue											; Print the cell value
+	add		esp, 8
 	jmp		interprete.readingLoop								; Keep reading the file
 
 .comma:
+	push	dword [ebp - 44]
+	push	dword [ebp - 40]
 	call	getValue											; Store a single byte of input into the cell value at index
+	add		esp, 8
 	jmp		interprete.readingLoop								; Keep reading the file
 
 .leftBracket:
+	push	dword [ebp - 44]
+	push	dword [ebp - 40]
 	lea		eax, [ebp - 8]										; Store the current instruction index's local variable effective address in register eax
 	push	eax													; Push current instruction index address
 	push	dword [ebp + 16]									; Push instruction size
 	push	dword [ebp + 12]									; Push instructions' address
 	call	jumpForwards										; Jump forward to the instruction after the matching ']' symbol if the current cell value is 0
-	add		esp, 12												; Clear stack arguments
+	add		esp, 20												; Clear stack arguments
 
 	cmp		eax, NO_ERROR										; Check if any error occurred when jumping forward (missing matching bracket)
 	je		interprete.readingLoop								; Keep reading the file if no error was found
@@ -152,12 +162,14 @@ interprete:
 	jmp		interprete.exit										; Exit the procedure with a failure return value
 
 .rightBracket:
+	push	dword [ebp - 44]
+	push	dword [ebp - 40]
 	lea		eax, [ebp - 8]										; Store the current instruction index's local variable effective address in register eax
 	push	eax													; Push current instruction index address
 	push	dword [ebp + 16]									; Push instruction size
 	push	dword [ebp + 12]									; Push instructions' address
 	call	jumpBackwards										; Jump backwards to the instruction after the matching '[' symbol if the current cell value is not 0
-	add		esp, 12												; Clear stack arguments
+	add		esp, 20												; Clear stack arguments
 
 	cmp		eax, NO_ERROR										; Check if any error occurred when jumping backwards (missing matching bracket)
 	je		interprete.readingLoop								; Keep reading the file if no error was found
@@ -184,14 +196,15 @@ incrementCellIndex:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
 
-	inc		dword [cellIndex]		; Increment cell index
+	mov		eax, dword [ebp + 12]
+	inc		dword [eax]				; Increment cell index
 
-	mov		eax, dword [size]		; Load tape size in register eax
+	mov		ecx, dword [ebp + 8]	; Load tape size in register eax
 
-	cmp		dword [cellIndex], eax	; Check if the index is out of the tape bounds
+	cmp		dword [eax], ecx		; Check if the index is out of the tape bounds
 	jl		incrementCellIndex.exit	; Exit procedure if the index is not out of bounds
 
-	mov		dword [cellIndex], 0	; Wrap index back to the first cell
+	mov		dword [eax], 0			; Wrap index back to the first cell
 
 .exit:
 	mov		esp, ebp				; Clear stack
@@ -205,15 +218,16 @@ decrementCellIndex:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
 
-	dec		dword [cellIndex]		; Decrement cell index
+	mov		eax, dword [ebp + 12]
+	dec		dword [eax]				; Decrement cell index
 
-	cmp		dword [cellIndex], 0	; Check if the index is out of the tape bounds
+	cmp		dword [eax], 0			; Check if the index is out of the tape bounds
 	jge		incrementCellIndex.exit	; Exit procedure if the index is not out of bounds
 
-	mov		eax, dword [size]		; Load tape size in register eax
-	dec		eax						; Decrement tape size to get last index
+	mov		ecx, dword [ebp + 8]	; Load tape size in register eax
+	dec		ecx						; Decrement tape size to get last index
 
-	mov		dword [cellIndex], eax	; Wrap around to the last cell
+	mov		dword [eax], ecx		; Wrap around to the last cell
 
 .exit:
 	mov		esp, ebp				; Clear stack
@@ -227,9 +241,9 @@ incrementCellValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
 
-	mov		ecx, dword [tapeAddress]	; Load tape address in register ecx
+	mov		ecx, dword [ebp + 8]		; Load tape address in register ecx
 
-	mov		eax, dword [cellIndex]		; Load cell index into the register eax
+	mov		eax, dword [ebp + 12]		; Load cell index into the register eax
 	inc		byte [eax + ecx]			; Increment cell value at the index
 
 	mov		esp, ebp					; Clear stack
@@ -243,9 +257,9 @@ decrementCellValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
 
-	mov		ecx, dword [tapeAddress]	; Load tape address in register ecx
+	mov		ecx, dword [ebp + 8]		; Load tape address in register ecx
 
-	mov		eax, dword [cellIndex]		; Load cell index into the register eax
+	mov		eax, dword [ebp + 12]		; Load cell index into the register eax
 	dec		byte [eax + ecx]			; Increment cell value at the index
 
 	mov		esp, ebp					; Clear stack
@@ -259,8 +273,8 @@ printValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
 
-	mov		eax, dword [tapeAddress]	; Load tape address into register eax
-	add		eax, dword [cellIndex]		; Add cell index offset to the tape address
+	mov		eax, dword [ebp + 8]		; Load tape address into register eax
+	add		eax, dword [ebp + 12]		; Add cell index offset to the tape address
 
 	push	1
 	push	eax
@@ -279,8 +293,8 @@ getValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
 
-	mov		eax, dword [tapeAddress]	; Load tape address into register eax
-	add		eax, dword [cellIndex]		; Add cell index offset to the tape address
+	mov		eax, dword [ebp + 8]		; Load tape address into register eax
+	add		eax, dword [ebp + 12]		; Add cell index offset to the tape address
 
 	push	1
 	push	eax
@@ -288,8 +302,8 @@ getValue:
 	call	sysRead						; Store input into the cell at index
 	add		esp, 12						; Clear stack arguments
 
-	mov		eax, dword [tapeAddress]	; Load tape address into register eax
-	add		eax, dword [cellIndex]		; Add cell index offset to the tape address
+	mov		eax, dword [ebp + 8]		; Load tape address into register eax
+	add		eax, dword [ebp + 12]		; Add cell index offset to the tape address
 
 	mov		esp, ebp					; Clear stack
 	pop		ebp							; Restore base pointer
@@ -303,9 +317,9 @@ jumpForwards:
 	mov		ebp, esp					; Set base pointer to stack pointer
 	sub		esp, 8						; Reserve 8 bytes on the stack for local variables (current character, and nesting level)
 
-	mov		eax, dword [cellIndex]		; Load cell index into the register eax
+	mov		eax, dword [ebp + 24]		; Load cell index into the register eax
 
-	mov		ecx, dword [tapeAddress]	; Load tape address into the register ecx
+	mov		ecx, dword [ebp + 20]		; Load tape address into the register ecx
 
 	cmp		byte [eax + ecx], 0			; Check if value at cell index is 0
 	jne		jumpForwards.success		; If the cell value is not 0 leave procedure successfully
@@ -363,9 +377,9 @@ jumpBackwards:
 	mov		ebp, esp					; Set base pointer to stack pointer
 	sub		esp, 8						; Reserve 8 bytes on the stack for local variables (current character, and nesting level)
 
-	mov		eax, dword [cellIndex]		; Load cell index into the register eax
+	mov		eax, dword [ebp + 24]		; Load cell index into the register eax
 
-	mov		ecx, dword [tapeAddress]	; Load tape address into the register ecx
+	mov		ecx, dword [ebp + 20]		; Load tape address into the register ecx
 
 	cmp		byte [eax + ecx], 0			; Check if value at cell index is 0
 	je		jumpBackwards.success		; If the cell value is not 0 leave the procedure successfully
