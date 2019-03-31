@@ -40,7 +40,7 @@ interpret:
 	mov		dword [eax], SYS_PROT_READ | SYS_PROT_WRITE			; Set map protection to read, and write
 
 	lea		eax, [ebp - 20]										; Store the map size's local variable effective address in register eax
-	mov		ecx, dword [ebp + 20]								; Store tape size in register ecx
+	mov		ecx, dword [ebp + 16]								; Store tape size in register ecx
 	mov		dword [eax], ecx
 
 	lea		eax, [ebp - 24]										; Store the map adress's local variable effective address in register eax
@@ -61,10 +61,10 @@ interpret:
 
 .readingLoop:
 	mov		eax, dword [ebp - 32]								; Store current instruction index in register eax
-	cmp		eax, dword [ebp + 16]								; Check if current instruction index is greater or equal to instruction size
+	cmp		eax, dword [ebp + 12]								; Check if current instruction index is greater or equal to instruction size
 	jge		interpret.success									; Exit procedure successfully if no more instructions
 
-	mov		eax, [ebp + 12]										; Store instructions address in register eax
+	mov		eax, [ebp + 8]										; Store instructions address in register eax
 	add		eax, dword [ebp - 32]											; Add current instruction index to instructions address
 	mov		al, byte [eax]										; Store character in register al
 	mov		byte [ebp - 40], al									; Store al in current character
@@ -98,7 +98,7 @@ interpret:
 	jmp		interpret.readingLoop								; Ignore the character read if it's not a valid symbol
 
 .greaterThan:
-	push	dword [ebp + 20]
+	push	dword [ebp + 16]
 	lea		eax, [ebp - 36]
 	push	eax
 	call	incrementCellIndex									; Increment the cell index
@@ -106,7 +106,7 @@ interpret:
 	jmp		interpret.readingLoop								; Keep reading the file
 
 .lessThan:
-	push	dword [ebp + 20]
+	push	dword [ebp + 16]
 	lea		eax, [ebp - 36]
 	push	eax
 	call	decrementCellIndex									; Decrement the cell index
@@ -146,7 +146,7 @@ interpret:
 	push	dword [ebp - 28]
 	lea		eax, [ebp - 32]										; Store the current instruction index's local variable effective address in register eax
 	push	eax													; Push current instruction index address
-	push	dword [ebp + 12]									; Push instructions' address
+	push	dword [ebp + 8]										; Push instructions' address
 	call	jumpForwards										; Jump forward to the instruction after the matching ']' symbol if the current cell value is 0
 	add		esp, 16												; Clear stack arguments
 
@@ -157,7 +157,7 @@ interpret:
 	push	dword [ebp - 28]
 	lea		eax, [ebp - 32]										; Store the current instruction index's local variable effective address in register eax
 	push	eax													; Push current instruction index address
-	push	dword [ebp + 12]									; Push instructions' address
+	push	dword [ebp + 8]										; Push instructions' address
 	call	jumpBackwards										; Jump backwards to the instruction after the matching '[' symbol if the current cell value is not 0
 	add		esp, 16												; Clear stack arguments
 

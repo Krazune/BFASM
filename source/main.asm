@@ -99,9 +99,8 @@ _start:
 	push	dword [tapeSize]			; Push tape size
 	push	dword [instructionSize]		; Push instruction size
 	push	dword [instructionsAddress]	; Push instructions address
-	push	dword [esp + 16]			; Push second argument to be used as parameter to the interpreter
 	call	interpret					; Call interpreter
-	add		esp, 16						; Clear stack arguments
+	add		esp, 12						; Clear stack arguments
 
 	cmp		eax, NO_ERROR				; Check for no error return code
 	je		_start.successExit			; Exit program with success exit status
