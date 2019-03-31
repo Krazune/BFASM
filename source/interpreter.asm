@@ -22,6 +22,34 @@ TAPE_MEMORY_ERROR	equ -1
 
 
 segment .text
+;
+;	Description:
+;		Interpret instructions, and manage the tape.
+;
+;	Parameters:
+;		Instructions' address.
+;		Instruction count.
+;		Tape size.
+;
+;	Local variables:
+;		File offset (part of the memory map argument structure).
+;		File descriptor (part of the memory map argument structure).
+;		Map flags (part of the memory map argument structure).
+;		Map protection (part of the memory map argument structure).
+;		Map size (part of the memory map argument structure).
+;		Map address (part of the memory map argument structure).
+;		Tape's address.
+;		Instruction index.
+;		Cell index.
+;		Last instruction read.
+;
+;	Return:
+;		On success, NO_ERROR is returned.
+;		On error, TAPE_MEMORY_ERROR is returned (the only error return value).
+;
+;	Notes:
+;		Assumes that the instructions, and the instruction count, are valid.
+;
 interpret:
 	push	ebp													; Store base pointer
 	mov		ebp, esp											; Set base pointer to stack pointer
@@ -179,6 +207,17 @@ interpret:
 
 
 
+;
+;	Description:
+;		Increment the cell index.
+;
+;	Parameters:
+;		Cell index's address.
+;		Tape size.
+;
+;	Return:
+;		None.
+;
 incrementCellIndex:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -201,6 +240,17 @@ incrementCellIndex:
 
 
 
+;
+;	Description:
+;		Decrement the cell index.
+;
+;	Parameters:
+;		Cell index's address.
+;		Tape size.
+;
+;	Return:
+;		None.
+;
 decrementCellIndex:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -224,6 +274,17 @@ decrementCellIndex:
 
 
 
+;
+;	Description:
+;		Increment the value of the current cell.
+;
+;	Parameters:
+;		Tape's addres.
+;		Cell index.
+;
+;	Return:
+;		None.
+;
 incrementCellValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -240,6 +301,17 @@ incrementCellValue:
 
 
 
+;
+;	Description:
+;		Decrement the value of the current cell.
+;
+;	Parameters:
+;		Tape's addres.
+;		Cell index.
+;
+;	Return:
+;		None.
+;
 decrementCellValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -256,6 +328,17 @@ decrementCellValue:
 
 
 
+;
+;	Description:
+;		Print the value of the current cell.
+;
+;	Parameters:
+;		Tape's address.
+;		Cell index.
+;
+;	Return:
+;		None.
+;
 printValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -276,6 +359,17 @@ printValue:
 
 
 
+;
+;	Description:
+;		Read a byte of input and save the it in the current cell.
+;
+;	Parameters:
+;		Tape's address.
+;		Cell index.
+;
+;	Return:
+;		None.
+;
 getValue:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -296,6 +390,26 @@ getValue:
 
 
 
+;
+;	Description:
+;		Advance the instruction index to the matching right bracket, if the current cell's value is 0.
+;
+;	Parameters:
+;		Instructions' address.
+;		Instruction index's address.
+;		Tape's address.
+;		Cell index.
+;
+;	Local variables:
+;		Bracket nesting level.
+;		Last character read from file.
+;
+;	Return:
+;		None.
+;
+;	Notes:
+;		Assumes that the bracket instructions have matching pairs.
+;
 jumpForwards:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -349,6 +463,26 @@ jumpForwards:
 
 
 
+;
+;	Description:
+;		Advance the instruction index to the matching left bracket, if the current cell's value is not 0.
+;
+;	Parameters:
+;		Instructions' address.
+;		Instruction index's address.
+;		Tape's address.
+;		Cell index.
+;
+;	Local variables:
+;		Bracket nesting level.
+;		Last character read from file.
+;
+;	Return:
+;		None.
+;
+;	Notes:
+;		Assumes that the bracket instructions have matching pairs.
+;
 jumpBackwards:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
