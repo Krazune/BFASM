@@ -100,7 +100,7 @@ _start:
 	push	dword [instructionSize]		; Push instruction size
 	push	dword [instructionsAddress]	; Push instructions address
 	push	dword [esp + 16]			; Push second argument to be used as parameter to the interpreter
-	call	interprete					; Call interpreter
+	call	interpret					; Call interpreter
 	add		esp, 16						; Clear stack arguments
 
 	cmp		eax, NO_ERROR				; Check for no error return code

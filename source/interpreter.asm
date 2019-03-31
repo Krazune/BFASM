@@ -22,7 +22,7 @@ TAPE_MEMORY_ERROR	equ -1
 
 
 segment .text
-interprete:
+interpret:
 	push	ebp													; Store base pointer
 	mov		ebp, esp											; Set base pointer to stack pointer
 	sub		esp, 40												; Reserve 40 bytes on the stack for local variables (memory map argument structure, tape address, current instruction index, cell index, current character)
@@ -53,7 +53,7 @@ interprete:
 	add		esp, 4												; Clear stack arguments
 
 	cmp		eax, -1												; Check if memory was mapped successfully
-	je		interprete.memoryError								; Exit the procedure if the memory was not mapped successfully
+	je		interpret.memoryError								; Exit the procedure if the memory was not mapped successfully
 
 	mov		dword [ebp - 28], eax
 	mov		dword [ebp - 32], 0									; Set current instruction index to 0
@@ -62,7 +62,7 @@ interprete:
 .readingLoop:
 	mov		eax, dword [ebp - 32]								; Store current instruction index in register eax
 	cmp		eax, dword [ebp + 16]								; Check if current instruction index is greater or equal to instruction size
-	jge		interprete.success									; Exit procedure successfully if no more instructions
+	jge		interpret.success									; Exit procedure successfully if no more instructions
 
 	mov		eax, [ebp + 12]										; Store instructions address in register eax
 	add		eax, dword [ebp - 32]											; Add current instruction index to instructions address
@@ -72,30 +72,30 @@ interprete:
 	inc		dword [ebp - 32]									; Increment current instruction index
 
 	cmp		byte [ebp - 40], '>'								; Check if the character read is '>'
-	je		interprete.greaterThan								; Process the '>' symbol
+	je		interpret.greaterThan								; Process the '>' symbol
 
 	cmp		byte [ebp - 40], '<'								; Check if the character read is '<'
-	je		interprete.lessThan									; Process the '<' symbol
+	je		interpret.lessThan									; Process the '<' symbol
 
 	cmp		byte [ebp - 40], '+'								; Check if the character read is '+'
-	je		interprete.plus										; Process the '+' symbol
+	je		interpret.plus										; Process the '+' symbol
 
 	cmp		byte [ebp - 40], '-'								; Check if the character read is '-'
-	je		interprete.minus									; Process the '-' symbol
+	je		interpret.minus										; Process the '-' symbol
 
 	cmp		byte [ebp - 40], '.'								; Check if the character read is '.'
-	je		interprete.dot										; Process the '.' symbol
+	je		interpret.dot										; Process the '.' symbol
 
 	cmp		byte [ebp - 40], ','								; Check if the character read is ','
-	je		interprete.comma									; Process the ',' symbol
+	je		interpret.comma										; Process the ',' symbol
 
 	cmp		byte [ebp - 40], '['								; Check if the character read is '['
-	je		interprete.leftBracket								; Process the '[' symbol
+	je		interpret.leftBracket								; Process the '[' symbol
 
 	cmp		byte [ebp - 40], ']'								; Check if the character read is ']'
-	je		interprete.rightBracket								; Process the ']' symbol
+	je		interpret.rightBracket								; Process the ']' symbol
 
-	jmp		interprete.readingLoop								; Ignore the character read if it's not a valid symbol
+	jmp		interpret.readingLoop								; Ignore the character read if it's not a valid symbol
 
 .greaterThan:
 	push	dword [ebp + 20]
@@ -103,7 +103,7 @@ interprete:
 	push	eax
 	call	incrementCellIndex									; Increment the cell index
 	add		esp, 8
-	jmp		interprete.readingLoop								; Keep reading the file
+	jmp		interpret.readingLoop								; Keep reading the file
 
 .lessThan:
 	push	dword [ebp + 20]
@@ -111,35 +111,35 @@ interprete:
 	push	eax
 	call	decrementCellIndex									; Decrement the cell index
 	add		esp, 8
-	jmp		interprete.readingLoop								; Keep reading the file
+	jmp		interpret.readingLoop								; Keep reading the file
 
 .plus:
 	push	dword [ebp - 36]
 	push	dword [ebp - 28]
 	call	incrementCellValue									; Increment the cell value
 	add		esp, 8
-	jmp		interprete.readingLoop								; Keep reading the file
+	jmp		interpret.readingLoop								; Keep reading the file
 
 .minus:
 	push	dword [ebp - 36]
 	push	dword [ebp - 28]
 	call	decrementCellValue									; Decrement the cell value
 	add		esp, 8
-	jmp		interprete.readingLoop								; Keep reading the file
+	jmp		interpret.readingLoop								; Keep reading the file
 
 .dot:
 	push	dword [ebp - 36]
 	push	dword [ebp - 28]
 	call	printValue											; Print the cell value
 	add		esp, 8
-	jmp		interprete.readingLoop								; Keep reading the file
+	jmp		interpret.readingLoop								; Keep reading the file
 
 .comma:
 	push	dword [ebp - 36]
 	push	dword [ebp - 28]
 	call	getValue											; Store a single byte of input into the cell value at index
 	add		esp, 8
-	jmp		interprete.readingLoop								; Keep reading the file
+	jmp		interpret.readingLoop								; Keep reading the file
 
 .leftBracket:
 	push	dword [ebp - 36]
@@ -150,7 +150,7 @@ interprete:
 	call	jumpForwards										; Jump forward to the instruction after the matching ']' symbol if the current cell value is 0
 	add		esp, 16												; Clear stack arguments
 
-	jmp		interprete.readingLoop								; Keep reading the file if no error was found
+	jmp		interpret.readingLoop								; Keep reading the file if no error was found
 
 .rightBracket:
 	push	dword [ebp - 36]
@@ -161,15 +161,15 @@ interprete:
 	call	jumpBackwards										; Jump backwards to the instruction after the matching '[' symbol if the current cell value is not 0
 	add		esp, 16												; Clear stack arguments
 
-	jmp		interprete.readingLoop								; Keep reading the file if no error was found
+	jmp		interpret.readingLoop								; Keep reading the file if no error was found
 
 .memoryError:
 	mov		eax, TAPE_MEMORY_ERROR								; Set the failure return value
-	jmp		interprete.exit										; Exit the procedure
+	jmp		interpret.exit										; Exit the procedure
 
 .success:
 	mov		eax, NO_ERROR										; Set the success return value
-	jmp		interprete.exit										; Exit the procedure
+	jmp		interpret.exit										; Exit the procedure
 
 .exit:
 	mov		esp, ebp											; Clear stack
