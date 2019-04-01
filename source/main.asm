@@ -42,6 +42,25 @@ segment .rodata
 
 
 segment .text
+;
+;	Description:
+;		Interpret the brainfuck instructions.
+;
+;	Parameters:
+;		File name (optional).
+;		Tape's size (optional).
+;
+;	Local variables:
+;		Tape's size.
+;		Instructions' address.
+;		Instruction count.
+;
+;	Return:
+;		None.
+;
+;	Notes:
+;		This is the main procedure of the program.
+;
 _start:
 	mov		ebp, esp					; Store the stack pointer in ebp.
 	sub		esp, 12
@@ -150,6 +169,13 @@ _start:
 
 
 
+;
+;	Description:
+;		Print the program information.
+;
+;	Return:
+;		None.
+;
 printInformation:
 	push	ebp					; Store base pointer
 	mov		ebp, esp			; Set base pointer to stack pointer
@@ -167,6 +193,13 @@ printInformation:
 
 
 
+;
+;	Description:
+;		Print the invalid argument count error message.
+;
+;	Return:
+;		None.
+;
 printArgumentCountError:
 	push	ebp									; Store base pointer
 	mov		ebp, esp							; Set base pointer to stack pointer
@@ -184,6 +217,13 @@ printArgumentCountError:
 
 
 
+;
+;	Description:
+;		Print the invalid path error message.
+;
+;	Return:
+;		None.
+;
 printInvalidPathError:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -201,6 +241,13 @@ printInvalidPathError:
 
 
 
+;
+;	Description:
+;		Print the memory error message.
+;
+;	Return:
+;		None.
+;
 printMemoryError:
 	push	ebp					; Store base pointer
 	mov		ebp, esp			; Set base pointer to stack pointer
@@ -218,6 +265,13 @@ printMemoryError:
 
 
 
+;
+;	Description:
+;		Print the missing left bracket error message.
+;
+;	Return:
+;		None.
+;
 printLeftBracketError:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -235,6 +289,13 @@ printLeftBracketError:
 
 
 
+;
+;	Description:
+;		Print the missing right bracket error message.
+;
+;	Return:
+;		None.
+;
 printRightBracketError:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
@@ -252,6 +313,13 @@ printRightBracketError:
 
 
 
+;
+;	Description:
+;		Print the invalid tape size error message.
+;
+;	Return:
+;		None.
+;
 printInvalidTapeSizeError:
 	push	ebp							; Store base pointer
 	mov		ebp, esp					; Set base pointer to stack pointer
@@ -269,6 +337,20 @@ printInvalidTapeSizeError:
 
 
 
+;
+;	Description:
+;		Convert string to positive integer.
+;
+;	Parameters:
+;		Integer string.
+;
+;	Return:
+;		On success, the integer is returned.
+;		On error, -1 is returned.
+;
+;	Notes:
+;		Only works for non-negative integers.
+;
 stoi:
 	push	ebp						; Store base pointer
 	mov		ebp, esp				; Set base pointer to stack pointer
