@@ -83,6 +83,7 @@ interpret:
 
 .readingLoop:
 	mov		eax, dword [ebp - 32]									; Store current instruction index in register eax
+
 	cmp		eax, dword [ebp + 12]									; Check if current instruction index is greater or equal to instruction size
 	jge		interpret.success										; Exit procedure successfully if no more instructions
 
@@ -117,14 +118,13 @@ interpret:
 	cmp		byte [ebp - 40], ']'									; Check if the character read is ']'
 	je		interpret.rightBracket									; Process the ']' symbol
 
-	jmp		interpret.readingLoop									; Ignore the character read if it's not a valid symbol
-
 .greaterThan:
 	push	dword [ebp + 16]
 	lea		eax, [ebp - 36]
 	push	eax
 	call	incrementCellIndex										; Increment the cell index
 	add		esp, 8
+
 	jmp		interpret.readingLoop									; Keep reading the file
 
 .lessThan:
@@ -133,6 +133,7 @@ interpret:
 	push	eax
 	call	decrementCellIndex										; Decrement the cell index
 	add		esp, 8
+
 	jmp		interpret.readingLoop									; Keep reading the file
 
 .plus:
@@ -140,6 +141,7 @@ interpret:
 	push	dword [ebp - 28]
 	call	incrementCellValue										; Increment the cell value
 	add		esp, 8
+
 	jmp		interpret.readingLoop									; Keep reading the file
 
 .minus:
@@ -147,6 +149,7 @@ interpret:
 	push	dword [ebp - 28]
 	call	decrementCellValue										; Decrement the cell value
 	add		esp, 8
+
 	jmp		interpret.readingLoop									; Keep reading the file
 
 .dot:
@@ -154,6 +157,7 @@ interpret:
 	push	dword [ebp - 28]
 	call	printValue												; Print the cell value
 	add		esp, 8
+
 	jmp		interpret.readingLoop									; Keep reading the file
 
 .comma:
@@ -161,6 +165,7 @@ interpret:
 	push	dword [ebp - 28]
 	call	getValue												; Store a single byte of input into the cell value at index
 	add		esp, 8
+
 	jmp		interpret.readingLoop									; Keep reading the file
 
 .leftBracket:
