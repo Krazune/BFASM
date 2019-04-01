@@ -288,10 +288,10 @@ incrementCellValue:
 	push	ebp						; Store the caller's base pointer.
 	mov		ebp, esp				; Set the current procedure's base pointer.
 
-	mov		ecx, dword [ebp + 8]	; Store the tape's address in ecx.
+	mov		eax, dword [ebp + 8]	; Store the tape's address in eax.
+	add		eax, dword [ebp + 12]	; Add the cell index to the tape's address.
 
-	mov		eax, dword [ebp + 12]	; Store the cell index in eax.
-	inc		byte [eax + ecx]		; Increment the cell value at the index.
+	inc		byte [eax]				; Increment the cell value at the index.
 
 	mov		esp, ebp				; Clear stack.
 	pop		ebp						; Restore caller's base pointer.
@@ -315,10 +315,10 @@ decrementCellValue:
 	push	ebp						; Store the caller's base pointer.
 	mov		ebp, esp				; Set the current procedure's base pointer.
 
-	mov		ecx, dword [ebp + 8]	; Store the tape's address in ecx.
+	mov		eax, dword [ebp + 8]	; Store the tape's address in eax.
+	add		eax, dword [ebp + 12]	; Add the cell index to the tape's address.
 
-	mov		eax, dword [ebp + 12]	; Store the cell index in eax.
-	dec		byte [eax + ecx]		; Decrement the cell value at the index.
+	dec		byte [eax]				; Decrement the cell value at the index.
 
 	mov		esp, ebp				; Clear stack.
 	pop		ebp						; Restore caller's base pointer.
@@ -414,11 +414,10 @@ jumpForwards:
 	mov		ebp, esp					; Set the current procedure's base pointer.
 	sub		esp, 8						; Reserve space for local variables (last instructions, bracket nesting level).
 
-	mov		eax, dword [ebp + 20]		; Store the cell index in eax.
+	mov		eax, dword [ebp + 16]		; Store the tape's address in eax.
+	add		eax, dword [ebp + 20]		; Add the cell index to the tape's address.
 
-	mov		ecx, dword [ebp + 16]		; Store the tape's address in ecx.
-
-	cmp		byte [eax + ecx], 0			; Compare the cell value with 0.
+	cmp		byte [eax], 0				; Compare the cell value with 0.
 	jne		jumpForwards.exit			; If the cell value is not 0, exit the procedure.
 
 	mov		dword [ebp - 4], 1			; Set the nesting level to 1.
@@ -487,11 +486,10 @@ jumpBackwards:
 	mov		ebp, esp					; Set the current procedure's base pointer.
 	sub		esp, 8						; Reserve space for local variables (last instructions, bracket nesting level).
 
-	mov		eax, dword [ebp + 20]		; Store the cell index in eax.
+	mov		eax, dword [ebp + 16]		; Store the tape's address in eax.
+	add		eax, dword [ebp + 20]		; Add the cell index to the tape's address.
 
-	mov		ecx, dword [ebp + 16]		; Store the tape's address in ecx.
-
-	cmp		byte [eax + ecx], 0			; Compare the cell value with 0.
+	cmp		byte [eax], 0				; Compare the cell value with 0.
 	je		jumpBackwards.exit			; If the cell value is 0, exit the procedure.
 
 	mov		dword [ebp - 4], 1			; Set the nesting level to 1.
