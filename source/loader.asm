@@ -82,18 +82,18 @@ load:
 
 	mov		dword [ebp - 8], eax									; Store the instruction count.
 
-	mov		dword [ebp - 36], 0										; Set the map address to 0 (let the kernel choose the address).
+	mov		dword [ebp - 16], 0										; Set the file offeset to 0 (ignored without a file).
+
+	mov		dword [ebp - 20], -1									; Set the file descriptor to -1 (map not backed by any file).
+
+	mov		dword [ebp - 24], SYS_MAP_PRIVATE | SYS_MAP_ANONYMOUS	; Set the map flags.
+
+	mov		dword [ebp - 28], SYS_PROT_READ | SYS_PROT_WRITE		; Set the map protection.
 
 	mov		ecx, dword [ebp - 8]									; Store the instruction count in ecx.
 	mov		dword [ebp - 32], ecx									; Set the map size to the instruction count.
 
-	mov		dword [ebp - 28], SYS_PROT_READ | SYS_PROT_WRITE		; Set the map protection.
-
-	mov		dword [ebp - 24], SYS_MAP_PRIVATE | SYS_MAP_ANONYMOUS	; Set the map flags.
-
-	mov		dword [ebp - 20], -1									; Set the file descriptor to -1 (map not backed by any file).
-
-	mov		dword [ebp - 16], 0										; Set the file offeset to 0 (ignored without a file).
+	mov		dword [ebp - 36], 0										; Set the map address to 0 (let the kernel choose the address).
 
 	lea		eax, [ebp - 36]											; Store the memory map argument structure's address in eax.
 
