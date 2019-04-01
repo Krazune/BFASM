@@ -41,22 +41,12 @@ segment .rodata
 
 
 
-segment .data
-	tapeSize	dd	30000
-
-
-
-
-segment .bss
-	instructionsAddress	resd	1
-	instructionSize		resd	1
-
-
-
-
 segment .text
 _start:
 	mov		ebp, esp					; Store the stack pointer in ebp.
+	sub		esp, 12
+
+	mov		dword [ebp - 4], 30000
 
 	cmp		dword [ebp], 1				; Check for single command line argument
 	je		_start.singleArgument		; Print program information if single argument
@@ -77,8 +67,10 @@ _start:
 	jmp		_start.successExit			; Exit program with success exit status
 
 .doubleArguments:
-	push	instructionSize				; Push instruction size's address
-	push	instructionsAddress			; Push instructions address's address
+	lea		eax, [ebp - 12]
+	push	eax							; Push instruction size's address
+	lea		eax, [ebp - 8]
+	push	eax							; Push instructions address's address
 	push	dword [ebp + 8]				; Push second argument to be used as parameter to the interpreter
 	call	load						; Load instructions
 	add		esp, 12						; Clear stack arguments
@@ -98,9 +90,9 @@ _start:
 	cmp		eax, MISSING_RIGHT_BRACKET	; Check for missing right bracket return code
 	je		_start.missingRightBracket	; Print missing bracket error and exit program
 
-	push	dword [tapeSize]			; Push tape size
-	push	dword [instructionSize]		; Push instruction size
-	push	dword [instructionsAddress]	; Push instructions address
+	push	dword [ebp - 4]				; Push tape size
+	push	dword [ebp - 12]			; Push instruction size
+	push	dword [ebp - 8]				; Push instructions address
 	call	interpret					; Call interpreter
 	add		esp, 12						; Clear stack arguments
 
@@ -118,7 +110,7 @@ _start:
 	cmp		eax, -1						; Check if the string was converted successfully
 	je		_start.invalidTapeSize		; Print invalid tape size error and exit program
 
-	mov		dword [tapeSize], eax		; Store tape size in tape size global variable
+	mov		dword [ebp - 4], eax		; Store tape size in tape size global variable
 
 	jmp		_start.doubleArguments		; Call interpreter with the rest of the arguments
 
