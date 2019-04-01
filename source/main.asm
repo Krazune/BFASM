@@ -56,13 +56,15 @@ segment .bss
 
 segment .text
 _start:
-	cmp		dword [esp], 1				; Check for single command line argument
+	mov		ebp, esp					; Store the stack pointer in ebp.
+
+	cmp		dword [ebp], 1				; Check for single command line argument
 	je		_start.singleArgument		; Print program information if single argument
 
-	cmp		dword [esp], 2				; Check for double command line arguments
+	cmp		dword [ebp], 2				; Check for double command line arguments
 	je		_start.doubleArguments		; Call interpreter if double arguments
 
-	cmp		dword [esp], 3				; Check for triple command line arguments
+	cmp		dword [ebp], 3				; Check for triple command line arguments
 	je		_start.tripleArguments		; Call interpreter if triple arguments
 
 	call	printArgumentCountError		; Print error if the argument count is greater than 2
@@ -77,7 +79,7 @@ _start:
 .doubleArguments:
 	push	instructionSize				; Push instruction size's address
 	push	instructionsAddress			; Push instructions address's address
-	push	dword [esp + 16]			; Push second argument to be used as parameter to the interpreter
+	push	dword [ebp + 8]				; Push second argument to be used as parameter to the interpreter
 	call	load						; Load instructions
 	add		esp, 12						; Clear stack arguments
 
@@ -109,7 +111,7 @@ _start:
 	je		_start.memoryError			; Print memory error and exit program
 
 .tripleArguments:
-	push	dword [esp + 12]			; Push tape size string
+	push	dword [ebp + 12]			; Push tape size string
 	call	stoi						; Convert tape size string to integer
 	add		esp, 4						; Clear stack arguments
 
