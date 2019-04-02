@@ -30,28 +30,14 @@ SYS_STDERR				equ	2	; Standard error stream.
 
 ; File flags
 SYS_RDONLY				equ	0	; File may be read.
-SYS_WRONLY				equ	1	; File may be written.
-SYS_RDWR				equ	2	; File may be read, and written.
 
 ; File origin
 SYS_SEEK_SET			equ	0	; Offset starts at the beginning of the file.
-SYS_SEEK_CUR			equ	1	; Offset starts at the current position.
-SYS_SEEK_END			equ	2	; Offset starts at the end of the file.
 
 ; Map permissions
-SYS_PROT_NONE			equ	0	; Mapping may not be accessed.
-SYS_PROT_READ			equ	1	; Mapping may be read.
-SYS_PROT_WRITE			equ	2	; Mapping may be written.
 SYS_PROT_RDWR			equ	3	; Mapping may be read, and written.
-SYS_PROT_EXEC			equ	4	; Mapping may be executed.
 
 ; Map flags
-SYS_MAP_SHARED			equ	1	; Changes are visible to other processes, and are carried through to the underlying file.
-SYS_MAP_PRIVATE			equ	2	; Changes are not visible to other processes, and are not carried through to the underlying file.
-SYS_MAP_SHARED_VALIDATE	equ	3	; Same as SYS_MAP_SHARED, but checks for unknown flags.
-SYS_MAP_TYPE			equ	15	; Mask for type of mapping.
-SYS_MAP_FIXED			equ	16	; Place the mapping at exactly the provided address.
-SYS_MAP_ANONYMOUS		equ	32	; The mapping is not backed by any file. Its contents are initialized to zero.
 SYS_MAP_PRIVANON		equ	34	; Changes are not visible to other processes, and there is no backing file.
 
 
