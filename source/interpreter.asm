@@ -51,157 +51,157 @@ segment .text
 ;		Assumes that the instructions, and the instruction count, are valid.
 ;
 interpret:
-	push	ebp														; Store the caller's base pointer.
-	mov		ebp, esp												; Set the current procedure's base pointer.
-	sub		esp, 40													; Reserve space for local variables (memory map argument structure, tape address, current instruction index, cell index, current character).
+	push	ebp									; Store the caller's base pointer.
+	mov		ebp, esp							; Set the current procedure's base pointer.
+	sub		esp, 40								; Reserve space for local variables (memory map argument structure, tape address, current instruction index, cell index, current character).
 
-	mov		dword [ebp - 4], 0										; Set the file offeset to 0 (ignored without a file).
+	mov		dword [ebp - 4], 0					; Set the file offeset to 0 (ignored without a file).
 
-	mov		dword [ebp - 8], -1										; Set the file descriptor to -1 (map not backed by any file).
+	mov		dword [ebp - 8], -1					; Set the file descriptor to -1 (map not backed by any file).
 
-	mov		dword [ebp - 12], SYS_MAP_PRIVATE | SYS_MAP_ANONYMOUS	; Set the map flags.
+	mov		dword [ebp - 12], SYS_MAP_PRIVANON	; Set the map flags.
 
-	mov		dword [ebp - 16], SYS_PROT_READ | SYS_PROT_WRITE		; Set the map protection.
+	mov		dword [ebp - 16], SYS_PROT_RDWR		; Set the map protection.
 
-	mov		ecx, dword [ebp + 16]									; Store the tape size in ecx.
-	mov		dword [ebp - 20], ecx									; Set the map size to the tape size.
+	mov		ecx, dword [ebp + 16]				; Store the tape size in ecx.
+	mov		dword [ebp - 20], ecx				; Set the map size to the tape size.
 
-	mov		dword [ebp - 24], 0										; Set the map address to 0 (let the kernel choose the address).
+	mov		dword [ebp - 24], 0					; Set the map address to 0 (let the kernel choose the address).
 
-	lea		eax, [ebp - 24]											; Store the memory map argument structure's address in eax.
+	lea		eax, [ebp - 24]						; Store the memory map argument structure's address in eax.
 
-	push	eax														; Push the memory map argument structure's address.
-	call	sysMMap													; Map memory.
-	add		esp, 4													; Clear the stack arguments.
+	push	eax									; Push the memory map argument structure's address.
+	call	sysMMap								; Map memory.
+	add		esp, 4								; Clear the stack arguments.
 
-	cmp		eax, -1													; Compare the system call return value with -1.
-	je		interpret.memoryError									; Exit the procedure if the memory was not mapped successfully.
+	cmp		eax, -1								; Compare the system call return value with -1.
+	je		interpret.memoryError				; Exit the procedure if the memory was not mapped successfully.
 
-	mov		dword [ebp - 28], eax									; Set the memory map address.
-	mov		dword [ebp - 32], 0										; Set the instruction index to 0.
-	mov		dword [ebp - 36], 0										; Set the cell index to 0.
+	mov		dword [ebp - 28], eax				; Set the memory map address.
+	mov		dword [ebp - 32], 0					; Set the instruction index to 0.
+	mov		dword [ebp - 36], 0					; Set the cell index to 0.
 
 .readingLoop:
-	mov		eax, dword [ebp - 32]									; Store the instruction index in eax.
+	mov		eax, dword [ebp - 32]				; Store the instruction index in eax.
 
-	cmp		eax, dword [ebp + 12]									; Compare the instruction index with the instruction count.
-	jge		interpret.success										; Exit the procedure successfully if the instruction index is equal, or greater, than the instruction count.
+	cmp		eax, dword [ebp + 12]				; Compare the instruction index with the instruction count.
+	jge		interpret.success					; Exit the procedure successfully if the instruction index is equal, or greater, than the instruction count.
 
-	mov		eax, [ebp + 8]											; Store the instructions' address in eax.
-	add		eax, dword [ebp - 32]									; Add the instruction index to the instructions' address.
-	mov		al, byte [eax]											; Store the instruction in al.
-	mov		byte [ebp - 40], al										; Store the instruction in the current instruction.
+	mov		eax, [ebp + 8]						; Store the instructions' address in eax.
+	add		eax, dword [ebp - 32]				; Add the instruction index to the instructions' address.
+	mov		al, byte [eax]						; Store the instruction in al.
+	mov		byte [ebp - 40], al					; Store the instruction in the current instruction.
 
-	inc		dword [ebp - 32]										; Increment the instruction index.
+	inc		dword [ebp - 32]					; Increment the instruction index.
 
-	cmp		byte [ebp - 40], '>'									; Compare the instruction read with '>'.
-	je		interpret.greaterThan									; Increase the cell index, if the instruction read is '>'.
+	cmp		byte [ebp - 40], '>'				; Compare the instruction read with '>'.
+	je		interpret.greaterThan				; Increase the cell index, if the instruction read is '>'.
 
-	cmp		byte [ebp - 40], '<'									; Compare the instruction read with '<'.
-	je		interpret.lessThan										; Decrease the cell index, if the instruction read is '<'.
+	cmp		byte [ebp - 40], '<'				; Compare the instruction read with '<'.
+	je		interpret.lessThan					; Decrease the cell index, if the instruction read is '<'.
 
-	cmp		byte [ebp - 40], '+'									; Compare the instruction read with '+'.
-	je		interpret.plus											; Increase the cell value, if the instruction read is '+'.
+	cmp		byte [ebp - 40], '+'				; Compare the instruction read with '+'.
+	je		interpret.plus						; Increase the cell value, if the instruction read is '+'.
 
-	cmp		byte [ebp - 40], '-'									; Compare the instruction read with '-'.
-	je		interpret.minus											; Decrease the cell value, if the instruction read is '-'.
+	cmp		byte [ebp - 40], '-'				; Compare the instruction read with '-'.
+	je		interpret.minus						; Decrease the cell value, if the instruction read is '-'.
 
-	cmp		byte [ebp - 40], '.'									; Compare the instruction read with '.'.
-	je		interpret.dot											; Print the cell value, if the instruction read is '.'.
+	cmp		byte [ebp - 40], '.'				; Compare the instruction read with '.'.
+	je		interpret.dot						; Print the cell value, if the instruction read is '.'.
 
-	cmp		byte [ebp - 40], ','									; Compare the instruction read with ','.
-	je		interpret.comma											; Read input into the cell value, if the instruction read is ','.
+	cmp		byte [ebp - 40], ','				; Compare the instruction read with ','.
+	je		interpret.comma						; Read input into the cell value, if the instruction read is ','.
 
-	cmp		byte [ebp - 40], '['									; Compare the instruction read with '['.
-	je		interpret.leftBracket									; Jump forwards, if the instruction read is '['.
+	cmp		byte [ebp - 40], '['				; Compare the instruction read with '['.
+	je		interpret.leftBracket				; Jump forwards, if the instruction read is '['.
 
-	cmp		byte [ebp - 40], ']'									; Compare the instruction read with ']'.
-	je		interpret.rightBracket									; Jump backwards, if the instruction read is ']'.
+	cmp		byte [ebp - 40], ']'				; Compare the instruction read with ']'.
+	je		interpret.rightBracket				; Jump backwards, if the instruction read is ']'.
 
 .greaterThan:
-	push	dword [ebp + 16]										; Push the tape size.
-	lea		eax, [ebp - 36]											; Store the cell index's address in eax.
-	push	eax														; Push the cell index's address.
-	call	incrementCellIndex										; Increment the cell index.
-	add		esp, 8													; Clear the stack arguments.
+	push	dword [ebp + 16]					; Push the tape size.
+	lea		eax, [ebp - 36]						; Store the cell index's address in eax.
+	push	eax									; Push the cell index's address.
+	call	incrementCellIndex					; Increment the cell index.
+	add		esp, 8								; Clear the stack arguments.
 
-	jmp		interpret.readingLoop									; Keep reading the instructions.
+	jmp		interpret.readingLoop				; Keep reading the instructions.
 
 .lessThan:
-	push	dword [ebp + 16]										; Push the tape size.
-	lea		eax, [ebp - 36]											; Store the cell index's address in eax.
-	push	eax														; Push the cell index's address.
-	call	decrementCellIndex										; Decrement the cell index.
-	add		esp, 8													; Clear the stack arguments.
+	push	dword [ebp + 16]					; Push the tape size.
+	lea		eax, [ebp - 36]						; Store the cell index's address in eax.
+	push	eax									; Push the cell index's address.
+	call	decrementCellIndex					; Decrement the cell index.
+	add		esp, 8								; Clear the stack arguments.
 
-	jmp		interpret.readingLoop									; Keep reading the instructions.
+	jmp		interpret.readingLoop				; Keep reading the instructions.
 
 .plus:
-	push	dword [ebp - 36]										; Push the cell index.
-	push	dword [ebp - 28]										; Push the tape's address.
-	call	incrementCellValue										; Increment the cell value
-	add		esp, 8													; Clear the stack arguments.
+	push	dword [ebp - 36]					; Push the cell index.
+	push	dword [ebp - 28]					; Push the tape's address.
+	call	incrementCellValue					; Increment the cell value
+	add		esp, 8								; Clear the stack arguments.
 
-	jmp		interpret.readingLoop									; Keep reading the instructions.
+	jmp		interpret.readingLoop				; Keep reading the instructions.
 
 .minus:
-	push	dword [ebp - 36]										; Push the cell index.
-	push	dword [ebp - 28]										; Push the tape's address.
-	call	decrementCellValue										; Decrement the cell value.
-	add		esp, 8													; Clear the stack arguments.
+	push	dword [ebp - 36]					; Push the cell index.
+	push	dword [ebp - 28]					; Push the tape's address.
+	call	decrementCellValue					; Decrement the cell value.
+	add		esp, 8								; Clear the stack arguments.
 
-	jmp		interpret.readingLoop									; Keep reading the instructions.
+	jmp		interpret.readingLoop				; Keep reading the instructions.
 
 .dot:
-	push	dword [ebp - 36]										; Push the cell index.
-	push	dword [ebp - 28]										; Push the tape's address.
-	call	printValue												; Print the cell value.
-	add		esp, 8													; Clear the stack arguments.
+	push	dword [ebp - 36]					; Push the cell index.
+	push	dword [ebp - 28]					; Push the tape's address.
+	call	printValue							; Print the cell value.
+	add		esp, 8								; Clear the stack arguments.
 
-	jmp		interpret.readingLoop									; Keep reading the instructions.
+	jmp		interpret.readingLoop				; Keep reading the instructions.
 
 .comma:
-	push	dword [ebp - 36]										; Push the cell index.
-	push	dword [ebp - 28]										; Push the tape's address.
-	call	getValue												; Read input into the cell value.
-	add		esp, 8													; Clear the stack arguments.
+	push	dword [ebp - 36]					; Push the cell index.
+	push	dword [ebp - 28]					; Push the tape's address.
+	call	getValue							; Read input into the cell value.
+	add		esp, 8								; Clear the stack arguments.
 
-	jmp		interpret.readingLoop									; Keep reading the instructions.
+	jmp		interpret.readingLoop				; Keep reading the instructions.
 
 .leftBracket:
-	push	dword [ebp - 36]										; Push the cell index.
-	push	dword [ebp - 28]										; Push the tape's address.
-	lea		eax, [ebp - 32]											; Store the instruction index's address in eax.
-	push	eax														; Push the instruction index's address.
-	push	dword [ebp + 8]											; Push instructions' address.
-	call	jumpForwards											; Jump forward.
-	add		esp, 16													; Clear the stack arguments.
+	push	dword [ebp - 36]					; Push the cell index.
+	push	dword [ebp - 28]					; Push the tape's address.
+	lea		eax, [ebp - 32]						; Store the instruction index's address in eax.
+	push	eax									; Push the instruction index's address.
+	push	dword [ebp + 8]						; Push instructions' address.
+	call	jumpForwards						; Jump forward.
+	add		esp, 16								; Clear the stack arguments.
 
-	jmp		interpret.readingLoop									; Keep reading the file.
+	jmp		interpret.readingLoop				; Keep reading the file.
 
 .rightBracket:
-	push	dword [ebp - 36]										; Push the cell index.
-	push	dword [ebp - 28]										; Push the tape's address.
-	lea		eax, [ebp - 32]											; Store the instruction index's address in eax.
-	push	eax														; Push the instruction index's address.
-	push	dword [ebp + 8]											; Push instructions' address.
-	call	jumpBackwards											; Jump backwards.
-	add		esp, 16													; Clear the stack arguments.
+	push	dword [ebp - 36]					; Push the cell index.
+	push	dword [ebp - 28]					; Push the tape's address.
+	lea		eax, [ebp - 32]						; Store the instruction index's address in eax.
+	push	eax									; Push the instruction index's address.
+	push	dword [ebp + 8]						; Push instructions' address.
+	call	jumpBackwards						; Jump backwards.
+	add		esp, 16								; Clear the stack arguments.
 
-	jmp		interpret.readingLoop									; Keep reading the file.
+	jmp		interpret.readingLoop				; Keep reading the file.
 
 .memoryError:
-	mov		eax, TAPE_MEMORY_ERROR									; Set the failure return value.
-	jmp		interpret.exit											; Exit the procedure.
+	mov		eax, TAPE_MEMORY_ERROR				; Set the failure return value.
+	jmp		interpret.exit						; Exit the procedure.
 
 .success:
-	mov		eax, NO_ERROR											; Set the success return value.
-	jmp		interpret.exit											; Exit the procedure.
+	mov		eax, NO_ERROR						; Set the success return value.
+	jmp		interpret.exit						; Exit the procedure.
 
 .exit:
-	mov		esp, ebp												; Clear stack.
-	pop		ebp														; Restore caller's base pointer.
-	ret																; Return to caller.
+	mov		esp, ebp							; Clear stack.
+	pop		ebp									; Restore caller's base pointer.
+	ret											; Return to caller.
 
 
 
