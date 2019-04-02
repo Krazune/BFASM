@@ -10,6 +10,12 @@ Current version: **2019.04.0**
 
 ---
 
+## License
+
+[MIT License](https://github.com/Krazune/BFASM/blob/master/LICENSE.md)
+
+---
+
 ## Brainfuck
 Brainfuck is a very simple programming language created by Urban Müller in 1993. It has 8 different instructions, which are used to operate an array of memory cells and a cell pointer, and it is a turing complete language. The minimalism of the language means that it is very complex to create anything useful with it.
 
