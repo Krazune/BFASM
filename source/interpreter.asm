@@ -195,6 +195,11 @@ interpret:
 	jmp		interpret.exit						; Exit the procedure.
 
 .success:
+	push	dword [ebp + 16]					; Push the tape size.
+	push	dword [ebp - 28]					; Push the tape's address.
+	call	sysMUnmap							; Unmap the memory map.
+	add		esp, 8								; Clear the stack arguments.
+
 	mov		eax, NO_ERROR						; Set the success return value.
 	jmp		interpret.exit						; Exit the procedure.
 

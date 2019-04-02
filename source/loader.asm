@@ -56,6 +56,7 @@ segment .text
 ;
 ;	Notes:
 ;		The instructions' memory map address, and the instruction count are passed to the caller using the parameters.
+;		Assumes the caller unmaps the instructions' memory map, on success.
 ;
 load:
 	push	ebp									; Store the caller's base pointer.
@@ -146,10 +147,20 @@ load:
 	jmp		load.closeAndExit					; Close file and exit the procedure.
 
 .missingLeftBracket:
+	push	dword [ebp - 8]						; Push the instruction count.
+	push	dword [ebp - 12]					; Push the instructions' address.
+	call	sysMUnmap							; Unmap the memory map.
+	add		esp, 8								; Clear the stack arguments.
+
 	mov		eax, MISSING_LEFT_BRACKET			; Set the error return value.
 	jmp		load.closeAndExit					; Close file and exit the procedure.
 
 .missingRightBracket:
+	push	dword [ebp - 8]						; Push the instruction count.
+	push	dword [ebp - 12]					; Push the instructions' address.
+	call	sysMUnmap							; Unmap the memory map.
+	add		esp, 8								; Clear the stack arguments.
+
 	mov		eax, MISSING_RIGHT_BRACKET			; Set the error return value.
 	jmp		load.closeAndExit					; Close file and exit the procedure.
 
