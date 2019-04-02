@@ -356,6 +356,7 @@ stoi:
 	mov		ebp, esp				; Set base pointer to stack pointer
 
 	mov		ecx, dword [ebp + 8]	; Load string address in register ecx
+
 	cmp		byte [ecx], 0			; Check if first character is 0
 	je		stoi.error				; Exit the procedure with a failure return value
 
