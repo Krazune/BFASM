@@ -4,9 +4,15 @@ Brainfuck interpreter for Linux, written in IA-32 assembly language using the NA
 ---
 
 ## Version
-Current version: **2019.03.1**
+Current version: **2019.04.0**
 
 *The version format is &quot;&lt;year&gt;.&lt;zero padded month&gt;.&lt;revision number&gt;&quot;.*
+
+---
+
+## License
+
+[MIT License](https://github.com/Krazune/BFASM/blob/master/LICENSE.md)
 
 ---
 
@@ -33,7 +39,7 @@ Instruction | Description | C equivalent
 Description | Value
 ---|---
 Cell size | 1 byte
-Tape size | 30000 cells
+Tape size | 30000 cells (configurable)
 Out of bounds behaviour | wraparound
 New line value | 10
 EOF behaviour | no change
@@ -54,7 +60,7 @@ ld -m elf_i386 -s -o bfasm main.o
 Usage:
 
 ```
-./bfasm <file name>
+./bfasm <file name> [tape size]
 ```
 
 ---
@@ -62,21 +68,17 @@ Usage:
 ## Limitations
 
 + Fixed size cells
-+ Fixed size tape
 + ASCII only input files
-+ Fragile error handling/file validation
 + Slow implementation
 
 ---
 
 ## Possible future changes
 
-+ Configurable tape size
-+ Better error handling/file validation
-+ Instructions loaded into program memory
++ Faster bracket jumps
 
 ---
 
 ## Notes
 
-This interpreter was created for learning purposes and it's not meant to be used as a full fledged interpreter. However, it might be improved in the future.
+This interpreter was created for learning purposes and it's not meant to be used for anything serious.
