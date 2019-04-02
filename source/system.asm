@@ -18,6 +18,7 @@ SYS_OPEN				equ	5	; Open and possibly create a file.
 SYS_CLOSE				equ	6	; Close a file descriptor.
 SYS_LSEEK				equ	19	; Reposition read/write file offset.
 SYS_MMAP				equ	90	; Map files or devices into memory.
+SYS_MUNMAP				equ	91	; Unmap memory pages.
 
 ; Program exit status codes
 SYS_EXIT_SUCCESS		equ	0	; Successful execution of a program.
@@ -325,6 +326,51 @@ sysMMap:
 
 	mov		eax, SYS_MMAP		; Load the system call value.
 	mov		ebx, [ebp + 8]		; Load the argument structure address.
+	int		0x80				; Invoke the system call.
+
+	cmp		eax, 0				; Compare the system call's return value with 0.
+	jge		sysMMap.exit		; Exit the procedure if the return value is not negative (successful return value).
+
+	cmp		eax, -4095			; Compare the system call's return value with the lowest error value.
+	jl		sysMMap.exit		; Exit the procedure if the return value is lower than -4095 (successful return value).
+
+	mov		[sys_errno], eax	; Set sys_errno to the system call's error number.
+	mov		eax, -1				; Set the procedure's return value to -1.
+
+.exit:
+	pop		ebx					; Restore the non-volatile register ebx.
+
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
+
+
+
+
+;
+;	Description:
+;		Unmap memory pages.
+;
+;	Parameters:
+;		Page's address.
+;		Map size.
+;
+;	Return:
+;		On success, 0 is returned.
+;		On error, -1 is returned.
+;
+;	Notes:
+;		On error, sets sys_errno with the error number.
+;
+sysMUnmap:
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
+
+	push	ebx					; Store the non-volatile register ebx.
+
+	mov		eax, SYS_MUNMAP		; Load the system call value.
+	mov		ebx, [ebp + 8]		; Load the page's address.
+	mov		ecx, [ebp + 12]		; Load the map size.
 	int		0x80				; Invoke the system call.
 
 	cmp		eax, 0				; Compare the system call's return value with 0.

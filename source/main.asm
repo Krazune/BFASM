@@ -115,6 +115,11 @@ _start:
 	call	interpret					; Interpret the instructions.
 	add		esp, 12						; Clear the stack arguments.
 
+	push	dword [ebp - 12]			; Push the instruction count.
+	push	dword [ebp - 8]				; Push the instructions' address.
+	call	sysMUnmap					; Unmap the instructions' memory map.
+	add		esp, 8						; Clear the stack arguments.
+
 	cmp		eax, NO_ERROR				; Compare the return value with NO_ERROR.
 	je		_start.successExit			; Exit the program with success exit status, on no errors.
 
