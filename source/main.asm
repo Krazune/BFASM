@@ -62,109 +62,109 @@ segment .text
 ;		This is the main procedure of the program.
 ;
 _start:
-	mov		ebp, esp					; Store the stack pointer in ebp.
-	sub		esp, 12
+	mov		ebp, esp					; Set the current procedure's base pointer.
+	sub		esp, 12						; Reserve space for local variables (tape's size, instructions' address, instruction count).
 
-	mov		dword [ebp - 4], 30000
+	mov		dword [ebp - 4], 30000		; Set the default tape's size.
 
-	cmp		dword [ebp], 1				; Check for single command line argument
-	je		_start.singleArgument		; Print program information if single argument
+	cmp		dword [ebp], 1				; Compare the argument count with 1.
+	je		_start.singleArgument		; Print the program information, if the argument count is 1.
 
-	cmp		dword [ebp], 2				; Check for double command line arguments
-	je		_start.doubleArguments		; Call interpreter if double arguments
+	cmp		dword [ebp], 2				; Compare the argument count with 2.
+	je		_start.doubleArguments		; Interpret the instructions, if the argument count is 2.
 
-	cmp		dword [ebp], 3				; Check for triple command line arguments
-	je		_start.tripleArguments		; Call interpreter if triple arguments
+	cmp		dword [ebp], 3				; Compare the argument count with 3.
+	je		_start.tripleArguments		; Set the tape's size, and interpret the instructions, if the argument count is 3.
 
-	call	printArgumentCountError		; Print error if the argument count is greater than 2
+	call	printArgumentCountError		; Print the invalid argument error message, if the argument count is greater than 3.
 
-	jmp		_start.failureExit			; Exit program with failure exit status on invalid argument count
+	jmp		_start.failureExit			; Exit the program with failure exit status on invalid argument count.
 
 .singleArgument:
-	call	printInformation			; Print program information
+	call	printInformation			; Print the program information.
 
-	jmp		_start.successExit			; Exit program with success exit status
+	jmp		_start.successExit			; Exit the program with success exit status.
 
 .doubleArguments:
-	lea		eax, [ebp - 12]
-	push	eax							; Push instruction size's address
-	lea		eax, [ebp - 8]
-	push	eax							; Push instructions address's address
-	push	dword [ebp + 8]				; Push second argument to be used as parameter to the interpreter
-	call	load						; Load instructions
-	add		esp, 12						; Clear stack arguments
+	lea		eax, [ebp - 12]				; Store the instruction count's address in eax.
+	push	eax							; Push instruction count's address.
+	lea		eax, [ebp - 8]				; Store the instructions' adress' address in eax.
+	push	eax							; Push instructions' address' address.
+	push	dword [ebp + 8]				; Push the file name.
+	call	load						; Load the instructions.
+	add		esp, 12						; Clear the stack arguments.
 
-	cmp		eax, LOAD_INVALID_PATH		; Check if path is invalid
-	je		_start.invalidPath			; Exit program with failure exit status on invalid path
+	cmp		eax, LOAD_INVALID_PATH		; Compare the return value with LOAD_INVALID_PATH.
+	je		_start.invalidPath			; Print error message, and exit the program with failure exit status, on invalid file name.
 
-	cmp		eax, ZERO_INSTRUCTIONS		; Check if zero instructions
-	je		_start.successExit			; Exit program with success exit status on zero instructions
+	cmp		eax, ZERO_INSTRUCTIONS		; Compare the return value ZERO_INSTRUCTIONS.
+	je		_start.successExit			; Exit the program with success exit status, on zero instructions.
 
-	cmp		eax, MEMORY_ERROR			; Check if zero instructions
-	je		_start.memoryError			; Exit program with failure exit status on memory error
+	cmp		eax, MEMORY_ERROR			; Compare the return value with MEMORY_ERROR.
+	je		_start.memoryError			; Print error message, and exit the program with failure exit status, on memory error.
 
-	cmp		eax, MISSING_LEFT_BRACKET	; Check for missing left bracket return code
-	je		_start.missingLeftBracket	; Print missing bracket error and exit program
+	cmp		eax, MISSING_LEFT_BRACKET	; Compare the return value with MISSING_LEFT_BRACKET.
+	je		_start.missingLeftBracket	; Print error message, and exit the program with failure exit status, on missing bracket.
 
-	cmp		eax, MISSING_RIGHT_BRACKET	; Check for missing right bracket return code
-	je		_start.missingRightBracket	; Print missing bracket error and exit program
+	cmp		eax, MISSING_RIGHT_BRACKET	; Compare the return value with MISSING_RIGHT_BRACKET.
+	je		_start.missingRightBracket	; Print error message, and exit the program with failure exit status, on missing bracket.
 
-	push	dword [ebp - 4]				; Push tape size
-	push	dword [ebp - 12]			; Push instruction size
-	push	dword [ebp - 8]				; Push instructions address
-	call	interpret					; Call interpreter
-	add		esp, 12						; Clear stack arguments
+	push	dword [ebp - 4]				; Push the tape's size.
+	push	dword [ebp - 12]			; Push the instruction count.
+	push	dword [ebp - 8]				; Push the instructions' address.
+	call	interpret					; Interpret the instructions.
+	add		esp, 12						; Clear the stack arguments.
 
-	cmp		eax, NO_ERROR				; Check for no error return code
-	je		_start.successExit			; Exit program with success exit status
+	cmp		eax, NO_ERROR				; Compare the return value with NO_ERROR.
+	je		_start.successExit			; Exit the program with success exit status, on no errors.
 
-	cmp		eax, TAPE_MEMORY_ERROR		; Check for memory error return code
-	je		_start.memoryError			; Print memory error and exit program
+	cmp		eax, TAPE_MEMORY_ERROR		; Compare the return value with TAPE_MEMORY_ERROR.
+	je		_start.memoryError			; Print error message, and exit the program with failure exit status, on memory error.
 
 .tripleArguments:
-	push	dword [ebp + 12]			; Push tape size string
-	call	stoi						; Convert tape size string to integer
-	add		esp, 4						; Clear stack arguments
+	push	dword [ebp + 12]			; Push the tape's size string.
+	call	stoi						; Convert the tape's size string to an integer.
+	add		esp, 4						; Clear the stack arguments.
 
-	cmp		eax, -1						; Check if the string was converted successfully
-	je		_start.invalidTapeSize		; Print invalid tape size error and exit program
+	cmp		eax, -1						; Compare the return value with -1.
+	je		_start.invalidTapeSize		; Print error, and exit program, if the return value is -1.
 
-	mov		dword [ebp - 4], eax		; Store tape size in tape size global variable
+	mov		dword [ebp - 4], eax		; Set the tape's size.
 
-	jmp		_start.doubleArguments		; Call interpreter with the rest of the arguments
+	jmp		_start.doubleArguments		; Interpret the instructions.
 
 .invalidPath:
-	call	printInvalidPathError		; Print missing bracket error
+	call	printInvalidPathError		; Print the error message.
 
-	jmp		_start.failureExit			; Exit program with failure exit status
+	jmp		_start.failureExit			; Exit the program with failure exit status.
 
 .invalidTapeSize:
-	call	printInvalidTapeSizeError	; Print memory error
+	call	printInvalidTapeSizeError	; Print the error message.
 
-	jmp		_start.failureExit			; Exit program with failure exit status
+	jmp		_start.failureExit			; Exit the program with failure exit status.
 
 .memoryError:
-	call	printMemoryError			; Print memory error
+	call	printMemoryError			; Print the error message.
 
-	jmp		_start.failureExit			; Exit program with failure exit status
+	jmp		_start.failureExit			; Exit the program with failure exit status.
 
 .missingLeftBracket:
-	call	printLeftBracketError		; Print missing bracket error
+	call	printLeftBracketError		; Print the error message.
 
-	jmp		_start.failureExit			; Exit program with failure exit status
+	jmp		_start.failureExit			; Exit the program with failure exit status.
 
 .missingRightBracket:
-	call	printRightBracketError		; Print missing bracket error
+	call	printRightBracketError		; Print the error message.
 
-	jmp		_start.failureExit			; Exit program with failure exit status
+	jmp		_start.failureExit			; Exit the program with failure exit status.
 
 .successExit:
-	push	SYS_EXIT_SUCCESS			; Set success exit status
-	call	sysExit						; Exit program
+	push	SYS_EXIT_SUCCESS			; Set success exit status.
+	call	sysExit						; Exit the program.
 
 .failureExit:
-	push	SYS_EXIT_FAILURE			; Set failure exit status
-	call	sysExit						; Exit program
+	push	SYS_EXIT_FAILURE			; Set failure exit status.
+	call	sysExit						; Exit the program.
 
 
 
@@ -177,18 +177,18 @@ _start:
 ;		None.
 ;
 printInformation:
-	push	ebp					; Store base pointer
-	mov		ebp, esp			; Set base pointer to stack pointer
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
 
-	push	helpMessageLength
-	push	helpMessage
-	push	SYS_STDOUT
-	call	sysWrite			; Print program information
-	add		esp, 12				; Clear stack arguments
+	push	helpMessageLength	; Push the program's information's length.
+	push	helpMessage			; Push the program's information.
+	push	SYS_STDOUT			; Push the file descriptor.
+	call	sysWrite			; Print the program information.
+	add		esp, 12				; Clear the stack arguments.
 
-	mov		esp, ebp			; Clear stack
-	pop		ebp					; Restore base pointer
-	ret							; Return to caller
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
 
 
 
@@ -201,18 +201,18 @@ printInformation:
 ;		None.
 ;
 printArgumentCountError:
-	push	ebp									; Store base pointer
-	mov		ebp, esp							; Set base pointer to stack pointer
+	push	ebp									; Store the caller's base pointer.
+	mov		ebp, esp							; Set the current procedure's base pointer.
 
-	push	invalidArgumentCountMessageLength
-	push	invalidArgumentCountMessage
-	push	SYS_STDERR
-	call	sysWrite							; Print argument count error message
-	add		esp, 12								; Clear stack arguments
+	push	invalidArgumentCountMessageLength	; Push the error message's length.
+	push	invalidArgumentCountMessage			; Push the error message.
+	push	SYS_STDERR							; Push the file descriptor.
+	call	sysWrite							; Print the argument count error message.
+	add		esp, 12								; Clear the stack arguments.
 
-	mov		esp, ebp							; Clear stack
-	pop		ebp									; Restore base pointer
-	ret											; Return to caller
+	mov		esp, ebp							; Clear stack.
+	pop		ebp									; Restore caller's base pointer.
+	ret											; Return to caller.
 
 
 
@@ -225,18 +225,18 @@ printArgumentCountError:
 ;		None.
 ;
 printInvalidPathError:
-	push	ebp						; Store base pointer
-	mov		ebp, esp				; Set base pointer to stack pointer
+	push	ebp						; Store the caller's base pointer.
+	mov		ebp, esp				; Set the current procedure's base pointer.
 
-	push	invalidPathErrorLength
-	push	invalidPathError
-	push	SYS_STDERR
-	call	sysWrite				; Print invalid path error
-	add		esp, 12					; Clear stack arguments
+	push	invalidPathErrorLength	; Push the error message's length.
+	push	invalidPathError		; Push the error message.
+	push	SYS_STDERR				; Push the file descriptor.
+	call	sysWrite				; Print the invalid file name error message.
+	add		esp, 12					; Clear the stack arguments.
 
-	mov		esp, ebp				; Clear stack
-	pop		ebp						; Restore base pointer
-	ret								; Return to caller
+	mov		esp, ebp				; Clear stack.
+	pop		ebp						; Restore caller's base pointer.
+	ret								; Return to caller.
 
 
 
@@ -249,18 +249,18 @@ printInvalidPathError:
 ;		None.
 ;
 printMemoryError:
-	push	ebp					; Store base pointer
-	mov		ebp, esp			; Set base pointer to stack pointer
+	push	ebp					; Store the caller's base pointer.
+	mov		ebp, esp			; Set the current procedure's base pointer.
 
-	push	memoryErrorLength
-	push	memoryError
-	push	SYS_STDERR
-	call	sysWrite			; Print memory error
-	add		esp, 12				; Clear stack arguments
+	push	memoryErrorLength	; Push the error message's length.
+	push	memoryError			; Push the error message.
+	push	SYS_STDERR			; Push the file descriptor.
+	call	sysWrite			; Print the memory error message.
+	add		esp, 12				; Clear the stack arguments.
 
-	mov		esp, ebp			; Clear stack
-	pop		ebp					; Restore base pointer
-	ret							; Return to caller
+	mov		esp, ebp			; Clear stack.
+	pop		ebp					; Restore caller's base pointer.
+	ret							; Return to caller.
 
 
 
@@ -273,18 +273,18 @@ printMemoryError:
 ;		None.
 ;
 printLeftBracketError:
-	push	ebp						; Store base pointer
-	mov		ebp, esp				; Set base pointer to stack pointer
+	push	ebp						; Store the caller's base pointer.
+	mov		ebp, esp				; Set the current procedure's base pointer.
 
-	push	leftBracketErrorLength
-	push	leftBracketError
-	push	SYS_STDERR
-	call	sysWrite				; Print missing left bracket error
-	add		esp, 12					; Clear stack arguments
+	push	leftBracketErrorLength	; Push the error message's length.
+	push	leftBracketError		; Push the error message.
+	push	SYS_STDERR				; Push the file descriptor.
+	call	sysWrite				; Print the missing left bracket error message.
+	add		esp, 12					; Clear the stack arguments.
 
-	mov		esp, ebp				; Clear stack
-	pop		ebp						; Restore base pointer
-	ret								; Return to caller
+	mov		esp, ebp				; Clear stack.
+	pop		ebp						; Restore caller's base pointer.
+	ret								; Return to caller.
 
 
 
@@ -297,18 +297,18 @@ printLeftBracketError:
 ;		None.
 ;
 printRightBracketError:
-	push	ebp						; Store base pointer
-	mov		ebp, esp				; Set base pointer to stack pointer
+	push	ebp						; Store the caller's base pointer.
+	mov		ebp, esp				; Set the current procedure's base pointer.
 
-	push	rightBracketErrorLength
-	push	rightBracketError
-	push	SYS_STDERR
-	call	sysWrite				; Print missing left bracket error
-	add		esp, 12					; Clear stack arguments
+	push	rightBracketErrorLength	; Push the error message's length.
+	push	rightBracketError		; Push the error message.
+	push	SYS_STDERR				; Push the file descriptor.
+	call	sysWrite				; Print the missing left bracket error message.
+	add		esp, 12					; Clear the stack arguments.
 
-	mov		esp, ebp				; Clear stack
-	pop		ebp						; Restore base pointer
-	ret								; Return to caller
+	mov		esp, ebp				; Clear stack.
+	pop		ebp						; Restore caller's base pointer.
+	ret								; Return to caller.
 
 
 
@@ -321,18 +321,18 @@ printRightBracketError:
 ;		None.
 ;
 printInvalidTapeSizeError:
-	push	ebp							; Store base pointer
-	mov		ebp, esp					; Set base pointer to stack pointer
+	push	ebp							; Store the caller's base pointer.
+	mov		ebp, esp					; Set the current procedure's base pointer.
 
-	push	invalidTapeSizeErrorLength
-	push	invalidTapeSizeError
-	push	SYS_STDERR
-	call	sysWrite					; Print missing left bracket error
-	add		esp, 12						; Clear stack arguments
+	push	invalidTapeSizeErrorLength	; Push the error message's length.
+	push	invalidTapeSizeError		; Push the error message.
+	push	SYS_STDERR					; Push the file descriptor.
+	call	sysWrite					; Print the missing left bracket error message.
+	add		esp, 12						; Clear the stack arguments.
 
-	mov		esp, ebp					; Clear stack
-	pop		ebp							; Restore base pointer
-	ret									; Return to caller
+	mov		esp, ebp					; Clear stack.
+	pop		ebp							; Restore caller's base pointer.
+	ret									; Return to caller.
 
 
 
@@ -352,43 +352,43 @@ printInvalidTapeSizeError:
 ;		Only works for non-negative integers.
 ;
 stoi:
-	push	ebp						; Store base pointer
-	mov		ebp, esp				; Set base pointer to stack pointer
+	push	ebp						; Store the caller's base pointer.
+	mov		ebp, esp				; Set the current procedure's base pointer.
 
-	mov		ecx, dword [ebp + 8]	; Load string address in register ecx
+	mov		ecx, dword [ebp + 8]	; Store the string in ecx.
 
-	cmp		byte [ecx], 0			; Check if first character is 0
-	je		stoi.error				; Exit the procedure with a failure return value
+	cmp		byte [ecx], 0			; Compare the first character with 0.
+	je		stoi.error				; Exit the procedure with a failure return value, if the string is empty.
 
-	mov		eax, 0					; Set initial value to 0
+	mov		eax, 0					; Set the initial value to 0.
 
 .convertLoop:
-	mov		ecx, dword [ebp + 8]	; Load current character address in register ecx
-	movzx	ecx, byte [ecx]			; Store current character in register ecx
+	mov		ecx, dword [ebp + 8]	; Store the current character's address in ecx.
+	movzx	ecx, byte [ecx]			; Store the current character in ecx.
 
-	cmp		ecx, 0					; Check if first character is 0
-	je		stoi.exit				; Exit the procedure
+	cmp		ecx, 0					; Compare the current character with 0.
+	je		stoi.exit				; Exit the procedure, if there are no more characters to be read.
 
-	sub		ecx, '0'				; Convert character to digit
+	sub		ecx, '0'				; Convert the character to digit.
 
-	cmp		ecx, 0					; Check if digit is below 0
-	jl		stoi.error				; Exit the procedure with a failure return value
+	cmp		ecx, 0					; Compare the digit with 0.
+	jl		stoi.error				; Exit the procedure with a failure return value, if the digit is lower than 0.
 
-	cmp		ecx, 9					; Check if digit is above 9
-	jg		stoi.error				; Exit the procedure with a failure return value
+	cmp		ecx, 9					; Compare the digit with 9.
+	jg		stoi.error				; Exit the procedure with a failure return value, if the digit is greater than 0.
 
-	mov		edx, 10					; Store 10 in register edx
-	mul		edx						; Multiply current value by 10
-	add		eax, ecx				; Add digit value to current value
+	mov		edx, 10					; Store 10 in edx.
+	mul		edx						; Multiply the current value by 10.
+	add		eax, ecx				; Add the digit to current value.
 
-	inc		dword [ebp + 8]			; Increment current character address
+	inc		dword [ebp + 8]			; Increment the current character address.
 
-	jmp		stoi.convertLoop		; Keep converting the integer
+	jmp		stoi.convertLoop		; Keep converting the string.
 
 .error:
-	mov		eax, -1					; Set the failure return value
+	mov		eax, -1					; Set the failure return value.
 
 .exit:
-	mov		esp, ebp				; Clear stack
-	pop		ebp						; Restore base pointer
-	ret								; Return to caller
+	mov		esp, ebp				; Clear stack.
+	pop		ebp						; Restore caller's base pointer.
+	ret								; Return to caller.
