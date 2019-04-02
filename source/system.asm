@@ -11,35 +11,35 @@
 
 
 ; System calls' values
-SYS_EXIT				equ	1	; Terminate the calling process with exit status.
-SYS_READ				equ	3	; Read from a file descriptor.
-SYS_WRITE				equ	4	; Write to a file descriptor.
-SYS_OPEN				equ	5	; Open and possibly create a file.
-SYS_CLOSE				equ	6	; Close a file descriptor.
-SYS_LSEEK				equ	19	; Reposition read/write file offset.
-SYS_MMAP				equ	90	; Map files or devices into memory.
-SYS_MUNMAP				equ	91	; Unmap memory pages.
+SYS_EXIT			equ	1	; Terminate the calling process with exit status.
+SYS_READ			equ	3	; Read from a file descriptor.
+SYS_WRITE			equ	4	; Write to a file descriptor.
+SYS_OPEN			equ	5	; Open and possibly create a file.
+SYS_CLOSE			equ	6	; Close a file descriptor.
+SYS_LSEEK			equ	19	; Reposition read/write file offset.
+SYS_MMAP			equ	90	; Map files or devices into memory.
+SYS_MUNMAP			equ	91	; Unmap memory pages.
 
 ; Program exit status codes
-SYS_EXIT_SUCCESS		equ	0	; Successful execution of a program.
-SYS_EXIT_FAILURE		equ	1	; Unsuccessful execution of a program.
+SYS_EXIT_SUCCESS	equ	0	; Successful execution of a program.
+SYS_EXIT_FAILURE	equ	1	; Unsuccessful execution of a program.
 
 ; Standard file descriptors
-SYS_STDIN				equ	0	; Standard input stream.
-SYS_STDOUT				equ	1	; Standard output stream.
-SYS_STDERR				equ	2	; Standard error stream.
+SYS_STDIN			equ	0	; Standard input stream.
+SYS_STDOUT			equ	1	; Standard output stream.
+SYS_STDERR			equ	2	; Standard error stream.
 
 ; File flags
-SYS_RDONLY				equ	0	; File may be read.
+SYS_RDONLY			equ	0	; File may be read.
 
 ; File origin
-SYS_SEEK_SET			equ	0	; Offset starts at the beginning of the file.
+SYS_SEEK_SET		equ	0	; Offset starts at the beginning of the file.
 
 ; Map permissions
-SYS_PROT_RDWR			equ	3	; Mapping may be read, and written.
+SYS_PROT_RDWR		equ	3	; Mapping may be read, and written.
 
 ; Map flags
-SYS_MAP_PRIVANON		equ	34	; Changes are not visible to other processes, and there is no backing file.
+SYS_MAP_PRIVANON	equ	34	; Changes are not visible to other processes, and there is no backing file.
 
 
 
