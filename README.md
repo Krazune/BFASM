@@ -4,7 +4,7 @@ Brainfuck interpreter for Linux, written in IA-32 assembly language using the NA
 ---
 
 ## Version
-Current version: **2019.04.0**
+Current version: **2019.04.1**
 
 *The version format is &quot;&lt;year&gt;.&lt;zero padded month&gt;.&lt;revision number&gt;&quot;.*
 

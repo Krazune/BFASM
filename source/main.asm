@@ -41,7 +41,7 @@ global _start
 
 
 segment .rodata
-	helpMessage							db	'BFASM: Brainfuck interpreter for the IA-32 architecture.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 'Version: 2019.03.1', 0xA, 0
+	helpMessage							db	'BFASM: Brainfuck interpreter for the IA-32 architecture.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 'Version: 2019.04.1', 0xA, 0
 	helpMessageLength					equ	$ - helpMessage
 
 	invalidArgumentCountMessage			db	'Invalid argument count.', 0xA, 'Usage: bfasm <path> [tape size]', 0xA, 0
