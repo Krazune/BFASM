@@ -73,7 +73,7 @@ Usage:
 
 ---
 
-## Possible future changes
+## Possible changes
 
 + Faster bracket jumps
 
@@ -81,4 +81,4 @@ Usage:
 
 ## Notes
 
-This interpreter was created for learning purposes and it's not meant to be used for anything serious.
+This interpreter was created for educational purposes only.
