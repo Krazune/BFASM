@@ -1,6 +1,10 @@
 # BFASM
 Brainfuck interpreter for Linux, written in IA-32 assembly language using the NASM syntax.
 
+![Mandelbrot](resources/mandelbrot.gif)
+
+*Execution of the mandelbrot program by Erik Bosman.*
+
 ---
 
 ## Version
@@ -49,7 +53,7 @@ Error stream | standard error
 
 ## Usage
 
-This program uses the NASM syntax, so it needs to be assembled using the NASM assembler.
+This program needs to be assembled using the NASM assembler.
 
 Assembly:
 ```
@@ -81,4 +85,4 @@ Usage:
 
 ## Notes
 
-This interpreter was created for educational purposes only.
+This interpreter was created for entertainment, and educational purposes.
