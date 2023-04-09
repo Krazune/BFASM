@@ -1,5 +1,5 @@
 # BFASM
-Brainfuck interpreter for Linux, written in IA-32 assembly language using the NASM syntax.
+Brainfuck interpreter for Linux, written in _IA-32/i386/x86_ assembly language using the NASM syntax.
 
 ![Mandelbrot](resources/mandelbrot.gif)
 
@@ -10,7 +10,7 @@ Brainfuck interpreter for Linux, written in IA-32 assembly language using the NA
 ## Version
 Current version: **2019.04.1**
 
-*The version format is &quot;&lt;year&gt;.&lt;zero padded month&gt;.&lt;revision number&gt;&quot;.*
+Format: *\<year\>.\<zero padded month\>.\<revision number\>*
 
 ---
 
@@ -21,7 +21,7 @@ Current version: **2019.04.1**
 ---
 
 ## Brainfuck
-Brainfuck is a very simple programming language created by Urban Müller in 1993. It has 8 different instructions, which are used to operate an array of memory cells and a cell pointer, and it is a turing complete language. The minimalism of the language means that it is very complex to create anything useful with it.
+Brainfuck is a very simple programming language created by Urban Müller in 1993. It has 8 different instructions which are used to operate a pointer, and an array of memory cells. The minimalistic aspect of the language means that it is very complex to create anything useful with it. Despite its simplicity, it's still a turing complete language.
 
 ### Instructions
 
@@ -55,16 +55,27 @@ Error stream | standard error
 
 This program needs to be assembled using the NASM assembler.
 
-Assembly:
+### Assembly:
 ```
 nasm -f elf main.asm
 ld -m elf_i386 -s -o bfasm main.o
 ```
 
-Usage:
-
+### Usage:
 ```
 ./bfasm <file name> [tape size]
+```
+
+### Dockerfile:
+A dockerfile is included which takes the same amount of arguments as bfasm, but the bf code must be passed directly as an argument.
+```
+docker build -t bfasm .
+docker run --rm -it bfasm <bf program surrounded by quotes> [tape size]
+```
+
+Docker run example:
+```
+docker run --rm -it bfasm ">++++++++++++++[<+++++++>-]<.++++."
 ```
 
 ---
@@ -73,16 +84,4 @@ Usage:
 
 + Fixed size cells
 + ASCII only input files
-+ Slow implementation
-
----
-
-## Possible changes
-
-+ Faster bracket jumps
-
----
-
-## Notes
-
-This interpreter was created for entertainment, and educational purposes.
++ Slow implementation (slow bracket jumps)
