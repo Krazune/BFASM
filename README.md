@@ -21,7 +21,7 @@ Format: *\<year\>.\<zero padded month\>.\<revision number\>*
 ---
 
 ## Brainfuck
-Brainfuck is a very simple programming language created by Urban Müller in 1993. It has 8 different instructions which are used to operate a pointer, and an array of memory cells. The minimalistic aspect of the language means that it is very complex to create anything useful with it. Despite its simplicity, it's still a turing complete language.
+Brainfuck is a very simple programming language created by Urban Müller in 1993. It has 8 different instructions which are used to operate a pointer and an array of memory cells. Despite being turing complete, the minimalistic aspect of the language means that it is very complex to create anything useful with it.
 
 ### Instructions
 
@@ -55,18 +55,18 @@ Error stream | standard error
 
 This program needs to be assembled using the NASM assembler.
 
-### Assembly:
+### Assembly
 ```
 nasm -f elf main.asm
 ld -m elf_i386 -s -o bfasm main.o
 ```
 
-### Usage:
+### Usage
 ```
 ./bfasm <file name> [tape size]
 ```
 
-### Dockerfile:
+### Dockerfile
 A dockerfile is included which takes the same amount of arguments as bfasm, but the bf code must be passed directly as an argument.
 ```
 docker build -t bfasm .
